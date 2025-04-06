@@ -1,0 +1,1 @@
+# Lotry.fun
