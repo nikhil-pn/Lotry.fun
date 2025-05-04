@@ -8,5 +8,10 @@
       "buttonTitle": "🚩 Start",
       "splashImageUrl": "https://lotry-fun.vercel.app/logo.png",
       "splashBackgroundColor": "#f5f0ec"
+    },
+    "accountAssociation": {
+      "header": "eyJmaWQiOjEwNjAxNTksInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHg5MzU0RTI4N0FjQ2JBMmM0NjAyMzBhYjgzQzVFMzdiNDg4Nzc2YWMyIn0",
+          "payload": "eyJkb21haW4iOiJsb3RyeS1mdW4udmVyY2VsLmFwcCJ9",
+          "signature": "MHg5ZDAxNDczYmU5ZGFlZjgwYzI4NGEwM2JjOWQyYWZjNzhhNjUxYzI3NjUwNDdmNjgwYTdlNTg2NjU0ZmY2YWI1NjBkNzE3ZjVmZmMxZDAwNGQ2YzQ5MGZlMTkxYTBlZDdjYThkNDY5OTlmYjM0ZjYxY2IzNWNmYWVlNTM1ODg0NjFi"
     }
   }
