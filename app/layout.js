@@ -19,7 +19,7 @@ const defaultUrl = process.env.VERCEL_URL
 const frameMetadata = {
   version: "next",
   // Use a real image URL (3:2 aspect ratio, <10MB)
-  imageUrl: `${defaultUrl}/placeholder-3-2.png`, // You need to create/host this image
+  imageUrl: `${defaultUrl}/logo.png`, // You need to create/host this image
   button: {
     title: "Open LOTRY.FUN", // Or a better call to action
     action: {

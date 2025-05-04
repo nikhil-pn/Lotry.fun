@@ -2,11 +2,11 @@
     "frame": {
       "version": "1",
       "name": "Lotry!",
-      "iconUrl": "https://yoink.party/logo.png",
-      "homeUrl": "https://yoink.party/framesV2/",
-      "imageUrl": "https://yoink.party/framesV2/opengraph-image",
+      "iconUrl": "https://lotry-fun.vercel.app/logo.png",
+      "homeUrl": "https://lotry-fun.vercel.app/",
+      "imageUrl": "https://lotry-fun.vercel.app/logo.png",
       "buttonTitle": "🚩 Start",
-      "splashImageUrl": "https://yoink.party/logo.png",
+      "splashImageUrl": "https://lotry-fun.vercel.app/logo.png",
       "splashBackgroundColor": "#f5f0ec"
     }
   }
