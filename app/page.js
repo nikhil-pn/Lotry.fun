@@ -1,11 +1,16 @@
 "use client";
 
+import { sdk } from "@farcaster/frame-sdk";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Home() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showOptionalFields, setShowOptionalFields] = useState(false);
+
+  useEffect(() => {
+    sdk.actions.ready();
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen bg-grey text-white font-[family-name:var(--font-geist-sans)]">
