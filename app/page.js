@@ -4,10 +4,12 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-grey text-white font-[family-name:var(--font-geist-sans)]">
       {/* Header - Title left, Buttons right */}
-      <header className="w-full p-4 sm:p-6 flex justify-between items-center">
+      <header className="w-full p-12 sm:p-6 flex justify-center sm:justify-between items-center">
         {/* Title moved back to header */}
-        <div className="text-2xl font-bold text-green-300">LOTRY.FUN</div>
-        <div className="flex items-center gap-4">
+        <div className="text-3xl sm:text-2xl font-bold text-green-300">
+          LOTRY.FUN
+        </div>
+        <div className="hidden sm:flex items-center gap-4">
           <button className="bg-green-300 text-gray-600 font-semibold py-2 px-3 text-sm rounded-md hover:bg-green-400 transition-colors">
             Create new lottery
           </button>
