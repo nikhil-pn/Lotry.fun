@@ -216,27 +216,10 @@ export default function CreateLottery({ onGoBack }) {
           />
         </div>
 
-        {/* Description Textarea */}
-        <div className="w-full">
-          <label
-            htmlFor="lottery-description"
-            className="block text-sm font-medium text-green-300 mb-1"
-          >
-            Description
-          </label>
-          <textarea
-            id="lottery-description"
-            rows={4}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-green-500"
-          />
-        </div>
-
         {/* Direct Cloudinary Image Upload */}
         <div className="w-full">
           <label className="block text-sm font-medium text-green-300 mb-1">
-            Image (Optional)
+            Image
           </label>
           <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-600 border-dashed rounded-md bg-gray-700">
             <div className="space-y-1 text-center">
@@ -321,20 +304,25 @@ export default function CreateLottery({ onGoBack }) {
           </div>
         </div>
 
-        {/* Show/Hide More Options Button */}
-        <div className="w-full text-left mt-2">
-          <button
-            type="button"
-            onClick={() => setShowOptionalFields(!showOptionalFields)}
-            className="text-sm text-green-300 hover:text-green-400"
-          >
-            {showOptionalFields ? "hide more options ↑" : "show more options ↓"}
-          </button>
-        </div>
-
         {/* Optional Fields Container */}
         {showOptionalFields && (
           <div className="w-full flex flex-col gap-4 mt-2">
+            {/* Description Textarea */}
+            <div className="w-full">
+              <label
+                htmlFor="lottery-description"
+                className="block text-sm font-medium text-green-300 mb-1"
+              >
+                Description
+              </label>
+              <textarea
+                id="lottery-description"
+                rows={4}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-green-500"
+              />
+            </div>
             {/* Telegram Link */}
             <div className="w-full">
               <label
@@ -388,6 +376,17 @@ export default function CreateLottery({ onGoBack }) {
             </div>
           </div>
         )}
+
+        {/* Show/Hide More Options Button */}
+        <div className="w-full text-left mt-2">
+          <button
+            type="button"
+            onClick={() => setShowOptionalFields(!showOptionalFields)}
+            className="text-sm text-green-300 hover:text-green-400"
+          >
+            {showOptionalFields ? "hide more options ↑" : "show more options ↓"}
+          </button>
+        </div>
 
         {/* Error and Success Messages */}
         {error && (
