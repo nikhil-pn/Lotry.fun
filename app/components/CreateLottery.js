@@ -1,9 +1,89 @@
 "use client";
 
 import { useState } from "react";
+import { db } from "../../lib/firebase"; // Assuming firebase is initialized in 'app/firebase.js'
+import { collection, addDoc } from "firebase/firestore";
 
 export default function CreateLottery({ onGoBack }) {
+  const [tokenName, setTokenName] = useState("");
+  const [ticker, setTicker] = useState("");
+  const [lotteryPool, setLotteryPool] = useState("");
+  const [lotteryDate, setLotteryDate] = useState("");
+  const [description, setDescription] = useState("");
+  const [imageFile, setImageFile] = useState(null); // For the file object
+  const [imagePreview, setImagePreview] = useState(""); // For the image preview URL
+
+  const [telegramLink, setTelegramLink] = useState("");
+  const [websiteLink, setWebsiteLink] = useState("");
+  const [twitterLink, setTwitterLink] = useState("");
+
   const [showOptionalFields, setShowOptionalFields] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+
+  const handleImageChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleCreateLottery = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError("");
+    setSuccessMessage("");
+
+    if (!tokenName || !ticker || !lotteryPool || !lotteryDate) {
+      setError(
+        "Please fill in all required fields: Token Name, Ticker, Lottery Pool, and Date."
+      );
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      // TODO: Implement image upload to Firebase Storage if imageFile is present
+      // For now, we'll just store a placeholder or image name if available
+
+      const lotteryData = {
+        tokenName,
+        ticker,
+        lotteryPool: parseFloat(lotteryPool) || 0, // Ensure it's a number
+        lotteryDate,
+        description,
+        // tokenImage: imageFile ? imageFile.name : "", // Or a URL from storage
+        telegramLink,
+        websiteLink,
+        twitterLink,
+        createdAt: new Date(),
+      };
+
+      const docRef = await addDoc(collection(db, "token"), lotteryData);
+      setSuccessMessage(
+        `Lottery "${tokenName}" created successfully! Document ID: ${docRef.id}`
+      );
+      // Reset form
+      setTokenName("");
+      setTicker("");
+      setLotteryPool("");
+      setLotteryDate("");
+      setDescription("");
+      setImageFile(null);
+      setImagePreview("");
+      setTelegramLink("");
+      setWebsiteLink("");
+      setTwitterLink("");
+      setShowOptionalFields(false);
+    } catch (e) {
+      console.error("Error adding document: ", e);
+      setError("Failed to create lottery. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="w-full max-w-md flex flex-col items-center">
@@ -16,19 +96,25 @@ export default function CreateLottery({ onGoBack }) {
       <h2 className="text-3xl font-semibold mb-6 text-green-300">
         Create New Lottery
       </h2>
-      <form className="w-full flex flex-col gap-4 items-start">
+      <form
+        className="w-full flex flex-col gap-4 items-start"
+        onSubmit={handleCreateLottery}
+      >
         {/* Name Input */}
         <div className="w-full">
           <label
             htmlFor="lottery-name"
             className="block text-sm font-medium text-green-300 mb-1 "
           >
-            Lottery Name
+            Token Name
           </label>
           <input
             type="text"
             id="lottery-name"
+            value={tokenName}
+            onChange={(e) => setTokenName(e.target.value)}
             className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-green-500"
+            required
           />
         </div>
         {/* Ticker Input */}
@@ -46,7 +132,10 @@ export default function CreateLottery({ onGoBack }) {
             <input
               type="text"
               id="lottery-ticker"
+              value={ticker}
+              onChange={(e) => setTicker(e.target.value.toUpperCase())}
               className="flex-1 block w-full h-10 rounded-none rounded-r-md bg-gray-700 border border-gray-600 px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-green-500 sm:text-sm"
+              required
             />
           </div>
         </div>
@@ -58,9 +147,12 @@ export default function CreateLottery({ onGoBack }) {
             Lottery Pool
           </label>
           <input
-            type="text"
-            id="lottery-pool" // Changed id from lottery-name to lottery-pool
+            type="number" // Changed to number
+            id="lottery-pool"
+            value={lotteryPool}
+            onChange={(e) => setLotteryPool(e.target.value)}
             className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-green-500"
+            required
           />
         </div>
         <div className="w-full">
@@ -71,9 +163,12 @@ export default function CreateLottery({ onGoBack }) {
             Date of lottery{" "}
           </label>
           <input
-            type="text"
-            id="lottery-date" // Changed id from lottery-name to lottery-date
+            type="date" // Changed to date
+            id="lottery-date"
+            value={lotteryDate}
+            onChange={(e) => setLotteryDate(e.target.value)}
             className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-green-500"
+            required
           />
         </div>
 
@@ -88,6 +183,8 @@ export default function CreateLottery({ onGoBack }) {
           <textarea
             id="lottery-description"
             rows={4}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
             className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-green-500"
           />
         </div>
@@ -95,45 +192,68 @@ export default function CreateLottery({ onGoBack }) {
         {/* Image Upload */}
         <div className="w-full">
           <label className="block text-sm font-medium text-green-300 mb-1">
-            Image
+            Image (Optional)
           </label>
           <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-600 border-dashed rounded-md bg-gray-700">
             <div className="space-y-1 text-center">
-              <svg
-                className="mx-auto h-12 w-12 text-gray-400"
-                stroke="currentColor"
-                fill="none"
-                viewBox="0 0 48 48"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+              {imagePreview ? (
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="mx-auto h-24 w-auto object-cover rounded-md mb-2"
                 />
-              </svg>
+              ) : (
+                <svg
+                  className="mx-auto h-12 w-12 text-gray-400"
+                  stroke="currentColor"
+                  fill="none"
+                  viewBox="0 0 48 48"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                  />
+                </svg>
+              )}
               <div className="flex text-sm text-gray-400 justify-center">
                 <label
                   htmlFor="file-upload"
                   className="relative cursor-pointer bg-gray-800 rounded-md font-medium text-green-300 hover:text-green-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-900 focus-within:ring-green-500 px-1"
                 >
-                  <span>drag and drop an image</span>
+                  <span>drag and drop an image or click</span>
                   <input
                     id="file-upload"
                     name="file-upload"
                     type="file"
                     accept="image/*"
+                    onChange={handleImageChange}
                     className="sr-only"
                   />
                 </label>
               </div>
-              <button
-                type="button"
-                className="mt-2 bg-gray-600 text-white font-semibold py-1 px-3 text-xs rounded-md hover:bg-gray-500 transition-colors"
-              >
-                select file
-              </button>
+              {!imagePreview && (
+                <p className="text-xs text-gray-500">
+                  PNG, JPG, GIF up to 10MB
+                </p>
+              )}
+              {imagePreview && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setImageFile(null);
+                    setImagePreview("");
+                    // Reset the input field value if needed
+                    const fileInput = document.getElementById("file-upload");
+                    if (fileInput) fileInput.value = "";
+                  }}
+                  className="mt-2 bg-red-500 text-white font-semibold py-1 px-3 text-xs rounded-md hover:bg-red-400 transition-colors"
+                >
+                  Remove Image
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -163,7 +283,9 @@ export default function CreateLottery({ onGoBack }) {
               <input
                 type="url"
                 id="telegram-link"
-                placeholder="(optional)"
+                value={telegramLink}
+                onChange={(e) => setTelegramLink(e.target.value)}
+                placeholder="https://t.me/yourgroup (optional)"
                 className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-green-500"
               />
             </div>
@@ -178,7 +300,9 @@ export default function CreateLottery({ onGoBack }) {
               <input
                 type="url"
                 id="website-link"
-                placeholder="(optional)"
+                value={websiteLink}
+                onChange={(e) => setWebsiteLink(e.target.value)}
+                placeholder="https://yourwebsite.com (optional)"
                 className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-green-500"
               />
             </div>
@@ -193,11 +317,25 @@ export default function CreateLottery({ onGoBack }) {
               <input
                 type="url"
                 id="twitter-link"
-                placeholder="(optional)"
+                value={twitterLink}
+                onChange={(e) => setTwitterLink(e.target.value)}
+                placeholder="https://twitter.com/yourprofile (optional)"
                 className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-green-500"
               />
             </div>
           </div>
+        )}
+
+        {/* Error and Success Messages */}
+        {error && (
+          <p className="text-xs text-red-400 mt-2 w-full text-center bg-red-900_bg-opacity-50 p-2 rounded">
+            {error}
+          </p>
+        )}
+        {successMessage && (
+          <p className="text-xs text-green-300 mt-2 w-full text-center bg-green-900_bg-opacity-50 p-2 rounded">
+            {successMessage}
+          </p>
         )}
 
         {/* Tip Text */}
@@ -209,9 +347,10 @@ export default function CreateLottery({ onGoBack }) {
         <div className="w-full mt-2">
           <button
             type="submit"
-            className="w-full bg-green-300 text-gray-600 font-semibold py-2 px-4 rounded-md hover:bg-green-400 transition-colors"
+            className="w-full bg-green-300 text-gray-600 font-semibold py-2 px-4 rounded-md hover:bg-green-400 transition-colors disabled:opacity-50"
+            disabled={isSubmitting}
           >
-            create lottery
+            {isSubmitting ? "Creating..." : "create lottery"}
           </button>
         </div>
       </form>
