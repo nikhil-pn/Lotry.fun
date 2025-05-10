@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { db } from "../../lib/firebase"; // Assuming firebase is initialized in 'app/firebase.js'
+import { db } from "../../lib/firebase"; // Remove storage import
 import { collection, addDoc } from "firebase/firestore";
 
 export default function CreateLottery({ onGoBack }) {
@@ -12,6 +12,7 @@ export default function CreateLottery({ onGoBack }) {
   const [description, setDescription] = useState("");
   const [imageFile, setImageFile] = useState(null); // For the file object
   const [imagePreview, setImagePreview] = useState(""); // For the image preview URL
+  const [cloudinaryImageUrl, setCloudinaryImageUrl] = useState(""); // Store Cloudinary URL
 
   const [telegramLink, setTelegramLink] = useState("");
   const [websiteLink, setWebsiteLink] = useState("");
@@ -21,12 +22,46 @@ export default function CreateLottery({ onGoBack }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [imageUploading, setImageUploading] = useState(false); // Keep this state for tracking
 
+  // Handle image file selection
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  // Upload to Cloudinary using our secure API endpoint
+  const uploadToCloudinary = async (file) => {
+    if (!file) return null;
+
+    setImageUploading(true);
+    try {
+      // Create form data
+      const formData = new FormData();
+      formData.append("file", file);
+
+      // Upload to our Next.js API endpoint
+      const response = await fetch("/api/uploadtocloudinary", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Upload failed");
+      }
+
+      const data = await response.json();
+      setCloudinaryImageUrl(data.secure_url);
+      setImageUploading(false);
+      return data.secure_url;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      setError("Failed to upload image. Please try again.");
+      setImageUploading(false);
+      return null;
     }
   };
 
@@ -45,8 +80,16 @@ export default function CreateLottery({ onGoBack }) {
     }
 
     try {
-      // TODO: Implement image upload to Firebase Storage if imageFile is present
-      // For now, we'll just store a placeholder or image name if available
+      // Upload image first if present
+      let imageUrl = cloudinaryImageUrl;
+      if (imageFile && !cloudinaryImageUrl) {
+        imageUrl = await uploadToCloudinary(imageFile);
+        if (!imageUrl && imageFile) {
+          // If image upload failed but image was selected, stop the submission
+          setIsSubmitting(false);
+          return;
+        }
+      }
 
       const lotteryData = {
         tokenName,
@@ -54,7 +97,7 @@ export default function CreateLottery({ onGoBack }) {
         lotteryPool: parseFloat(lotteryPool) || 0, // Ensure it's a number
         lotteryDate,
         description,
-        // tokenImage: imageFile ? imageFile.name : "", // Or a URL from storage
+        tokenImage: imageUrl, // Use Cloudinary URL directly
         telegramLink,
         websiteLink,
         twitterLink,
@@ -73,6 +116,7 @@ export default function CreateLottery({ onGoBack }) {
       setDescription("");
       setImageFile(null);
       setImagePreview("");
+      setCloudinaryImageUrl("");
       setTelegramLink("");
       setWebsiteLink("");
       setTwitterLink("");
@@ -189,7 +233,7 @@ export default function CreateLottery({ onGoBack }) {
           />
         </div>
 
-        {/* Image Upload */}
+        {/* Direct Cloudinary Image Upload */}
         <div className="w-full">
           <label className="block text-sm font-medium text-green-300 mb-1">
             Image (Optional)
@@ -218,12 +262,13 @@ export default function CreateLottery({ onGoBack }) {
                   />
                 </svg>
               )}
+
               <div className="flex text-sm text-gray-400 justify-center">
                 <label
                   htmlFor="file-upload"
-                  className="relative cursor-pointer bg-gray-800 rounded-md font-medium text-green-300 hover:text-green-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-900 focus-within:ring-green-500 px-1"
+                  className="relative cursor-pointer bg-gray-800 rounded-md font-medium text-green-300 hover:text-green-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-900 focus-within:ring-green-500 px-3 py-2"
                 >
-                  <span>drag and drop an image or click</span>
+                  <span>Select an image</span>
                   <input
                     id="file-upload"
                     name="file-upload"
@@ -234,9 +279,29 @@ export default function CreateLottery({ onGoBack }) {
                   />
                 </label>
               </div>
+
               {!imagePreview && (
                 <p className="text-xs text-gray-500">
                   PNG, JPG, GIF up to 10MB
+                </p>
+              )}
+              {imagePreview && !cloudinaryImageUrl && !imageUploading && (
+                <button
+                  type="button"
+                  onClick={() => uploadToCloudinary(imageFile)}
+                  className="mt-2 bg-green-600 text-white font-semibold py-1 px-3 text-xs rounded-md hover:bg-green-500 transition-colors"
+                >
+                  Upload to Cloudinary
+                </button>
+              )}
+              {imageUploading && (
+                <p className="text-xs text-green-300 mt-2">
+                  Uploading image...
+                </p>
+              )}
+              {cloudinaryImageUrl && (
+                <p className="text-xs text-green-300 mt-2">
+                  Image uploaded successfully!
                 </p>
               )}
               {imagePreview && (
@@ -245,9 +310,7 @@ export default function CreateLottery({ onGoBack }) {
                   onClick={() => {
                     setImageFile(null);
                     setImagePreview("");
-                    // Reset the input field value if needed
-                    const fileInput = document.getElementById("file-upload");
-                    if (fileInput) fileInput.value = "";
+                    setCloudinaryImageUrl("");
                   }}
                   className="mt-2 bg-red-500 text-white font-semibold py-1 px-3 text-xs rounded-md hover:bg-red-400 transition-colors"
                 >
@@ -348,9 +411,13 @@ export default function CreateLottery({ onGoBack }) {
           <button
             type="submit"
             className="w-full bg-green-300 text-gray-600 font-semibold py-2 px-4 rounded-md hover:bg-green-400 transition-colors disabled:opacity-50"
-            disabled={isSubmitting}
+            disabled={isSubmitting || imageUploading}
           >
-            {isSubmitting ? "Creating..." : "create lottery"}
+            {isSubmitting
+              ? "Creating..."
+              : imageUploading
+              ? "Uploading image..."
+              : "create lottery"}
           </button>
         </div>
       </form>
