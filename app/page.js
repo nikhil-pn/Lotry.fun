@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Navbar from "./components/Navbar"; // Corrected path
+import TokenList from "./components/tokenList";
 // import CreateLottery from "./components/CreateLottery"; // No longer directly used here
 
 export default function Home() {
@@ -36,7 +37,10 @@ export default function Home() {
           </button>
         </div>
       </main>
-      {/* Optional Footer Spacer */}
+      {/* Token List Section */}
+      <div className="w-full py-8">
+        <TokenList />
+      </div>
       <footer className="h-10"></footer>
     </div>
   );
