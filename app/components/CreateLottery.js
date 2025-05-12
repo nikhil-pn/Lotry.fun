@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { db } from "../../lib/firebase"; // Remove storage import
 import { collection, addDoc } from "firebase/firestore";
+import DatePicker from "../common/DatePicker";
 
 export default function CreateLottery({ onGoBack }) {
   const [tokenName, setTokenName] = useState("");
@@ -30,6 +31,8 @@ export default function CreateLottery({ onGoBack }) {
       const file = e.target.files[0];
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
+      // Automatically upload to Cloudinary when image is selected
+      uploadToCloudinary(file);
     }
   };
 
@@ -105,9 +108,7 @@ export default function CreateLottery({ onGoBack }) {
       };
 
       const docRef = await addDoc(collection(db, "token"), lotteryData);
-      setSuccessMessage(
-        `Lottery "${tokenName}" created successfully! Document ID: ${docRef.id}`
-      );
+      setSuccessMessage(`Lottery "${tokenName}" created successfully!`);
       // Reset form
       setTokenName("");
       setTicker("");
@@ -190,29 +191,38 @@ export default function CreateLottery({ onGoBack }) {
           >
             Lottery Pool
           </label>
-          <input
-            type="number" // Changed to number
-            id="lottery-pool"
-            value={lotteryPool}
-            onChange={(e) => setLotteryPool(e.target.value)}
-            className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-green-500"
-            required
-          />
+          <div className="relative">
+            <input
+              type="text"
+              id="lottery-pool"
+              value={lotteryPool}
+              onChange={(e) => {
+                // Only allow numbers and decimals
+                const value = e.target.value;
+                if (value === "" || /^\d*\.?\d*$/.test(value)) {
+                  setLotteryPool(value);
+                }
+              }}
+              className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-green-500"
+              placeholder="Enter amount"
+              required
+            />
+            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+              $
+            </span>
+          </div>
         </div>
         <div className="w-full">
           <label
             htmlFor="lottery-date"
-            className="block text-sm font-medium text-green-300 mb-1 "
+            className="block text-sm font-medium text-green-300 mb-1"
           >
-            Date of lottery{" "}
+            Date of lottery
           </label>
-          <input
-            type="date" // Changed to date
-            id="lottery-date"
-            value={lotteryDate}
-            onChange={(e) => setLotteryDate(e.target.value)}
-            className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-green-500"
-            required
+          <DatePicker
+            selectedDate={lotteryDate}
+            onDateChange={(date) => setLotteryDate(date)}
+            placeholder="Select date"
           />
         </div>
 
@@ -267,15 +277,6 @@ export default function CreateLottery({ onGoBack }) {
                 <p className="text-xs text-gray-500">
                   PNG, JPG, GIF up to 10MB
                 </p>
-              )}
-              {imagePreview && !cloudinaryImageUrl && !imageUploading && (
-                <button
-                  type="button"
-                  onClick={() => uploadToCloudinary(imageFile)}
-                  className="mt-2 bg-green-600 text-white font-semibold py-1 px-3 text-xs rounded-md hover:bg-green-500 transition-colors"
-                >
-                  Upload to Cloudinary
-                </button>
               )}
               {imageUploading && (
                 <p className="text-xs text-green-300 mt-2">
