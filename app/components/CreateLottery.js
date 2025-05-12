@@ -74,9 +74,16 @@ export default function CreateLottery({ onGoBack }) {
     setError("");
     setSuccessMessage("");
 
-    if (!tokenName || !ticker || !lotteryPool || !lotteryDate) {
+    // Enhanced validation to include image requirement
+    if (
+      !tokenName ||
+      !ticker ||
+      !lotteryPool ||
+      !lotteryDate ||
+      !cloudinaryImageUrl
+    ) {
       setError(
-        "Please fill in all required fields: Token Name, Ticker, Lottery Pool, and Date."
+        "Please fill in all required fields: Token Name, Ticker, Lottery Pool, Date, and Image."
       );
       setIsSubmitting(false);
       return;
@@ -149,9 +156,9 @@ export default function CreateLottery({ onGoBack }) {
         <div className="w-full">
           <label
             htmlFor="lottery-name"
-            className="block text-sm font-medium text-green-300 mb-1 "
+            className="block text-sm font-medium text-green-300 mb-1"
           >
-            Token Name
+            Token Name <span className="text-green-500">*</span>
           </label>
           <input
             type="text"
@@ -159,7 +166,6 @@ export default function CreateLottery({ onGoBack }) {
             value={tokenName}
             onChange={(e) => setTokenName(e.target.value)}
             className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-green-500"
-            required
           />
         </div>
         {/* Ticker Input */}
@@ -168,7 +174,7 @@ export default function CreateLottery({ onGoBack }) {
             htmlFor="lottery-ticker"
             className="block text-sm font-medium text-green-300 mb-1"
           >
-            Ticker
+            Ticker <span className="text-green-500">*</span>
           </label>
           <div className="flex items-center">
             <span className="inline-flex items-center px-3 h-10 rounded-l-md border border-r-0 border-gray-600 bg-gray-800 text-gray-400 text-sm">
@@ -180,16 +186,15 @@ export default function CreateLottery({ onGoBack }) {
               value={ticker}
               onChange={(e) => setTicker(e.target.value.toUpperCase())}
               className="flex-1 block w-full h-10 rounded-none rounded-r-md bg-gray-700 border border-gray-600 px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-green-500 sm:text-sm"
-              required
             />
           </div>
         </div>
         <div className="w-full">
           <label
             htmlFor="lottery-pool"
-            className="block text-sm font-medium text-green-300 mb-1 "
+            className="block text-sm font-medium text-green-300 mb-1"
           >
-            Lottery Pool
+            Lottery Pool <span className="text-green-500">*</span>
           </label>
           <div className="relative">
             <input
@@ -205,7 +210,6 @@ export default function CreateLottery({ onGoBack }) {
               }}
               className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-green-500"
               placeholder="Enter amount"
-              required
             />
             <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
               $
@@ -217,7 +221,7 @@ export default function CreateLottery({ onGoBack }) {
             htmlFor="lottery-date"
             className="block text-sm font-medium text-green-300 mb-1"
           >
-            Date of lottery
+            Date of lottery <span className="text-green-500">*</span>
           </label>
           <DatePicker
             selectedDate={lotteryDate}
@@ -229,7 +233,7 @@ export default function CreateLottery({ onGoBack }) {
         {/* Direct Cloudinary Image Upload */}
         <div className="w-full">
           <label className="block text-sm font-medium text-green-300 mb-1">
-            Image
+            Image <span className="text-green-500">*</span>
           </label>
           <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-600 border-dashed rounded-md bg-gray-700">
             <div className="space-y-1 text-center">
@@ -403,7 +407,8 @@ export default function CreateLottery({ onGoBack }) {
 
         {/* Tip Text */}
         <p className="text-xs text-gray-400 mt-2 w-full text-center">
-          Tip: coin data cannot be changed after creation
+          Tip: fields marked with <span className="text-red-500">*</span> are
+          required. Coin data cannot be changed after creation.
         </p>
 
         {/* Create Lottery Button */}
