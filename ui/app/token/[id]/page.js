@@ -40,7 +40,7 @@ export default async function TokenPage({ params }) {
   // Basic styling for the page - you can expand this with Tailwind CSS classes
   return (
     <div className="min-h-screen bg-black text-white p-4">
-        <Navbar />
+      <Navbar />
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6">
@@ -68,6 +68,14 @@ export default async function TokenPage({ params }) {
 
           {/* Right Column - Token Info and Trading Interface */}
           <div className="lg:col-span-1 flex flex-col gap-6">
+            {/* Trading Interface */}
+            <div className="flex-grow">
+              <TokenTradeInterface
+                tokenSymbol={token.ticker}
+                tokenName={token.name}
+              />
+            </div>
+
             {/* Token Info */}
             <div className="bg-green-800/30 rounded-xl border border-green-600 shadow-lg p-4">
               <h2 className="text-xl font-semibold text-green-300 mb-3">
@@ -137,16 +145,6 @@ export default async function TokenPage({ params }) {
                   ))}
                 </ul>
               </div>
-            </div>
-
-            {/* Trading Interface */}
-            <div className="flex-grow">
-              <TokenTradeInterface
-                tokenSymbol={token.ticker}
-                tokenName={token.name}
-              />
-            </div>
-            <div className="flex-grow">
             </div>
           </div>
         </div>
