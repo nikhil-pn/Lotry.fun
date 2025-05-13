@@ -5,7 +5,7 @@ import { WalletConnect } from "./WalletConnect.jsx";
 
 export default function Navbar() {
   return (
-    <header className="w-full p-12 sm:p-6 flex justify-center sm:justify-between items-center">
+    <header className="w-full p-12 sm:p-6 flex justify-center sm:justify-between items-center sticky top-0 z-50 bg-black">
       <div className="text-3xl sm:text-2xl font-bold text-green-300">
         <Link href="/" passHref legacyBehavior>
           <a>LOTRY.FUN</a>

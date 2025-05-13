@@ -3,6 +3,7 @@
 // This is a Server Component by default in Next.js App Router
 import TokenTradingChart from "../../../components/TokenTradingChart";
 import TokenTradeInterface from "../../../components/TokenTradeInterface";
+import Navbar from "../../components/Navbar";
 
 async function getTokenDetails(id) {
   // In a real application, you would fetch token data based on the ID
@@ -38,7 +39,8 @@ export default async function TokenPage({ params }) {
 
   // Basic styling for the page - you can expand this with Tailwind CSS classes
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-green-900 text-white p-4">
+    <div className="min-h-screen bg-black text-white p-4">
+        <Navbar />
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6">
