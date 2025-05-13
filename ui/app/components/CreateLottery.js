@@ -1,9 +1,92 @@
 "use client";
 
-import { useState } from "react";
-import { db } from "../../lib/firebase"; // Remove storage import
+import { useState, useEffect } from "react";
+import { db } from "../../lib/firebase";
 import { collection, addDoc } from "firebase/firestore";
 import DatePicker from "../common/DatePicker";
+import { ethers } from "ethers";
+import { 
+  useAccount, 
+  useWriteContract, 
+  useWaitForTransactionReceipt 
+} from "wagmi";
+import { config as wagmiConfig } from "../utils/wagmi";
+
+// ABI for TokenLaunchpad
+const tokenLaunchpadABI = [
+  {
+    "type": "event",
+    "name": "TokenCreated",
+    "inputs": [
+      { "type": "address", "name": "tokenAddress", "indexed": true },
+      { "type": "string", "name": "name", "indexed": false },
+      { "type": "string", "name": "symbol", "indexed": false }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "function",
+    "name": "launchToken",
+    "inputs": [
+      { "type": "string", "name": "name" },
+      { "type": "string", "name": "symbol" },
+      { "type": "uint256", "name": "initialTokenPrice" },
+      { "type": "uint256", "name": "initialLotteryPool" }
+    ],
+    "outputs": [
+      { "type": "address", "name": "" }
+    ],
+    "stateMutability": "nonpayable" // Assuming it's not payable and modifies state
+  },
+  {
+    "type": "function",
+    "name": "getAllTokens",
+    "inputs": [],
+    "outputs": [
+      {
+        "type": "tuple[]",
+        "name": "",
+        "components": [
+          { "type": "address", "name": "tokenAddress" },
+          { "type": "string", "name": "name" },
+          { "type": "string", "name": "symbol" }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "owner",
+    "inputs": [],
+    "outputs": [
+      { "type": "address", "name": "" }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "renounceOwnership",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "transferOwnership",
+    "inputs": [
+      { "type": "address", "name": "newOwner" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  }
+  // You would also need the constructor if you ever call it directly via ABI,
+  // but for useWriteContract targeting launchToken, it's not strictly needed here.
+  // And any other Ownable events if you interact with them.
+];
+
+// Contract Address deployed on Base Sepolia with wallet 0xC43389A2B7eB3e5540FDC734dA7205A215551d01
+const contractAddress = "0xB6A265C087A7dF387dB167c52005AeB4f6C538C9";
 
 export default function CreateLottery({ onGoBack }) {
   const [tokenName, setTokenName] = useState("");
@@ -25,6 +108,31 @@ export default function CreateLottery({ onGoBack }) {
   const [successMessage, setSuccessMessage] = useState("");
   const [imageUploading, setImageUploading] = useState(false); // Keep this state for tracking
 
+  const { address: accountAddress, isConnected, chain } = useAccount(); // Get account status and chain from Wagmi
+
+  // Wagmi's write contract hook
+  const { 
+    data: txHash, // Renamed from `hash` for clarity
+    error: writeContractError, 
+    isPending: isWriteContractPending,
+    writeContractAsync // We'll call this function
+  } = useWriteContract();
+
+  const resetFormFields = () => {
+    setTokenName("");
+    setTicker("");
+    setLotteryPool("");
+    setLotteryDate("");
+    setDescription("");
+    setImageFile(null);
+    setImagePreview("");
+    setCloudinaryImageUrl("");
+    setTelegramLink("");
+    setWebsiteLink("");
+    setTwitterLink("");
+    setShowOptionalFields(false);
+  };
+
   // Handle image file selection
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -41,6 +149,7 @@ export default function CreateLottery({ onGoBack }) {
     if (!file) return null;
 
     setImageUploading(true);
+    setError("");
     try {
       // Create form data
       const formData = new FormData();
@@ -70,71 +179,176 @@ export default function CreateLottery({ onGoBack }) {
 
   const handleCreateLottery = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setError("");
     setSuccessMessage("");
+    setIsSubmitting(true);
 
-    // Enhanced validation to include image requirement
-    if (
-      !tokenName ||
-      !ticker ||
-      !lotteryPool ||
-      !lotteryDate ||
-      !cloudinaryImageUrl
-    ) {
-      setError(
-        "Please fill in all required fields: Token Name, Ticker, Lottery Pool, Date, and Image."
-      );
+    if (!tokenName || !ticker || !lotteryPool || !lotteryDate || !cloudinaryImageUrl) {
+      setError("Please fill in all required fields: Token Name, Ticker, Lottery Pool, Date, and Image.");
       setIsSubmitting(false);
       return;
     }
 
+    // --- Firebase Data Saving ---
+    // This happens before blockchain interaction. Consider if this order is preferred.
+    let firebaseDocId;
     try {
-      // Upload image first if present
-      let imageUrl = cloudinaryImageUrl;
-      if (imageFile && !cloudinaryImageUrl) {
-        imageUrl = await uploadToCloudinary(imageFile);
-        if (!imageUrl && imageFile) {
-          // If image upload failed but image was selected, stop the submission
-          setIsSubmitting(false);
-          return;
-        }
-      }
-
       const lotteryData = {
         tokenName,
         ticker,
         lotteryPool: parseFloat(lotteryPool) || 0, // Ensure it's a number
         lotteryDate,
         description,
-        tokenImage: imageUrl, // Use Cloudinary URL directly
+        tokenImage: cloudinaryImageUrl, // Use Cloudinary URL directly
         telegramLink,
         websiteLink,
         twitterLink,
         createdAt: new Date(),
+        status: "pending_blockchain" // Initial status
       };
 
       const docRef = await addDoc(collection(db, "token"), lotteryData);
-      setSuccessMessage(`Lottery "${tokenName}" created successfully!`);
-      // Reset form
-      setTokenName("");
-      setTicker("");
-      setLotteryPool("");
-      setLotteryDate("");
-      setDescription("");
-      setImageFile(null);
-      setImagePreview("");
-      setCloudinaryImageUrl("");
-      setTelegramLink("");
-      setWebsiteLink("");
-      setTwitterLink("");
-      setShowOptionalFields(false);
-    } catch (e) {
-      console.error("Error adding document: ", e);
-      setError("Failed to create lottery. Please try again.");
-    } finally {
+      firebaseDocId = docRef.id;
+      // Don't reset form or show full success yet, blockchain part follows.
+      setSuccessMessage("Lottery data saved, preparing blockchain transaction...");
+    } catch (dbError) {
+      console.error("Error adding document to Firebase: ", dbError);
+      setError("Failed to save lottery data. Please try again.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    // --- Smart Contract Interaction ---
+    if (!isConnected || !accountAddress) {
+      setError("Please connect your wallet to launch the token.");
+      setIsSubmitting(false); // Stops after Firebase save if wallet not connected
+      return;
+    }
+    if (chain && chain.id !== 84532) { // Base Sepolia Chain ID
+      setError(`Please switch your wallet to Base Sepolia. You are on chain ID ${chain.id}.`);
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const parsedTokenPrice = ethers.parseEther("0.0001");
+      const parsedPoolAmount = ethers.parseEther(lotteryPool.toString());
+
+      console.log("Submitting launchToken transaction...");
+      await writeContractAsync({
+        address: contractAddress,
+        abi: tokenLaunchpadABI,
+        functionName: 'launchToken',
+        args: [
+          tokenName,
+          ticker,
+          parsedTokenPrice,
+          parsedPoolAmount
+        ],
+      });
+      // `txHash` state from `useWriteContract` will be updated by the hook.
+      // `isWriteContractPending` will be true while wallet is open / processing.
+      // The `useEffect` watching `txHash` (now `data` from `useWriteContract`) will handle next steps.
+      // `setSuccessMessage` will be updated by the useEffect for receipt.
+      // Form reset will also happen in useEffect after full success.
+    } catch (contractCallError) {
+      console.error("Smart contract call error (writeContractAsync): ", contractCallError);
+      setError(`Blockchain transaction failed: ${contractCallError.shortMessage || contractCallError.message}`);
+      // Optionally update Firebase status to "failed"
+      if (firebaseDocId) { /* updateDoc(doc(db, "token", firebaseDocId), { status: "blockchain_failed" }); */ }
+      setIsSubmitting(false); // Overall submission stops if contract call fails to initiate
+    }
+    // Note: `isSubmitting` remains true if `writeContractAsync` was called successfully,
+    // as we are now waiting for `isWriteContractPending` and then `isReceiptLoading`.
+    // The button's disabled state should reflect `isSubmitting || isWriteContractPending || isReceiptLoading`
+  };
+
+  // Hook to wait for the transaction receipt
+  const { 
+    data: receipt, 
+    error: waitForReceiptError, 
+    isLoading: isReceiptLoading, 
+    isSuccess: isReceiptSuccess 
+  } = useWaitForTransactionReceipt({ hash: txHash });
+
+  useEffect(() => {
+    // This effect runs when `txHash` from `useWriteContract` is set,
+    // or when receipt status changes.
+    if (isWriteContractPending) {
+        setSuccessMessage("Please confirm the transaction in your wallet...");
+        setError(""); // Clear previous errors
+        return; // Don't proceed further if still pending wallet confirmation
+    }
+    if (writeContractError) {
+        setError(`Transaction submission failed: ${writeContractError.shortMessage || writeContractError.message}`);
+        setSuccessMessage("");
+        setIsSubmitting(false);
+        return;
+    }
+
+    if (txHash && !isReceiptLoading && !isReceiptSuccess && !waitForReceiptError) {
+        setSuccessMessage(`Transaction ${txHash} sent. Waiting for blockchain confirmation...`);
+    }
+    
+    if (isReceiptSuccess && receipt) {
+      console.log("Transaction confirmed:", receipt);
+      const contractInterface = new ethers.Interface(tokenLaunchpadABI);
+      let newLotteryName = tokenName; // Capture tokenName at time of effect run
+      if (typeof window !== "undefined") { // Try to get from form if available, else fallback needed
+        const formTokenName = document.getElementById('lottery-name')?.value;
+        if (formTokenName) newLotteryName = formTokenName;
+      }
+
+      if (receipt.logs) {
+        const eventTopic = ethers.id("TokenCreated(address,string,string)");
+        const tokenCreatedLog = receipt.logs.find(log => 
+          log.topics[0] === eventTopic && 
+          log.address.toLowerCase() === contractAddress.toLowerCase()
+        );
+
+        if (tokenCreatedLog) {
+          try {
+            const decodedEvent = contractInterface.parseLog({ topics: tokenCreatedLog.topics, data: tokenCreatedLog.data });
+            if (decodedEvent && decodedEvent.args) {
+              const newTokenAddress = decodedEvent.args.tokenAddress;
+              setSuccessMessage(`Lottery "${newLotteryName}" launched! Token: ${newTokenAddress}. Tx: ${txHash}`);
+              resetFormFields(); // Reset form on full success
+            } else {
+              setSuccessMessage(`Lottery "${newLotteryName}" launched! Tx: ${txHash}. (Could not parse event details)`);
+            }
+          } catch (parseError) {
+            setSuccessMessage(`Lottery "${newLotteryName}" launched! Tx: ${txHash}. (Error parsing event)`);
+            console.error("Error parsing TokenCreated event:", parseError);
+          }
+        } else {
+          setSuccessMessage(`Lottery "${newLotteryName}" launched! Tx: ${txHash}. (TokenCreated event not found in logs)`);
+        }
+      } else {
+        setSuccessMessage(`Lottery "${newLotteryName}" launched! Tx: ${txHash}. (No logs in receipt)`);
+      }
       setIsSubmitting(false);
     }
+
+    if (waitForReceiptError) {
+      console.error("Error waiting for transaction receipt:", waitForReceiptError);
+      setError(`Transaction confirmation failed: ${waitForReceiptError.shortMessage || waitForReceiptError.message}`);
+      setSuccessMessage("");
+      setIsSubmitting(false);
+    }
+  }, [
+    txHash, writeContractError, isWriteContractPending, 
+    receipt, isReceiptSuccess, isReceiptLoading, waitForReceiptError,
+    tokenName // Keep tokenName for messages if form is reset early
+  ]);
+
+  // Determine overall loading state for the button
+  const isLoading = imageUploading || isSubmitting || isWriteContractPending || isReceiptLoading;
+  const buttonText = () => {
+    if (imageUploading) return "Uploading image...";
+    if (isWriteContractPending) return "Confirm in wallet...";
+    if (isReceiptLoading) return "Processing on blockchain...";
+    if (isSubmitting) return "Submitting..."; // General submission before wallet interaction
+    return "Create Lottery";
   };
 
   return (
@@ -162,7 +376,7 @@ export default function CreateLottery({ onGoBack }) {
           </label>
           <input
             type="text"
-            id="lottery-name"
+            id="lottery-name" // Used by useEffect to grab tokenName for success message
             value={tokenName}
             onChange={(e) => setTokenName(e.target.value)}
             className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-green-500"
@@ -209,10 +423,10 @@ export default function CreateLottery({ onGoBack }) {
                 }
               }}
               className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-green-500"
-              placeholder="Enter amount"
+              placeholder="Enter amount (e.g., 1.5)"
             />
             <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-              $
+              ETH
             </span>
           </div>
         </div>
@@ -265,7 +479,7 @@ export default function CreateLottery({ onGoBack }) {
                   htmlFor="file-upload"
                   className="relative cursor-pointer bg-gray-800 rounded-md font-medium text-green-300 hover:text-green-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-gray-900 focus-within:ring-green-500 px-3 py-2"
                 >
-                  <span>Select an image</span>
+                  <span>{imageFile ? "Change image" : "Select an image"}</span>
                   <input
                     id="file-upload"
                     name="file-upload"
@@ -416,13 +630,9 @@ export default function CreateLottery({ onGoBack }) {
           <button
             type="submit"
             className="w-full bg-green-300 text-gray-600 font-semibold py-2 px-4 rounded-md hover:bg-green-400 transition-colors disabled:opacity-50"
-            disabled={isSubmitting || imageUploading}
+            disabled={isLoading}
           >
-            {isSubmitting
-              ? "Creating..."
-              : imageUploading
-              ? "Uploading image..."
-              : "create lottery"}
+            {buttonText()}
           </button>
         </div>
       </form>
