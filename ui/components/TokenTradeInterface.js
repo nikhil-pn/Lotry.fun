@@ -7,7 +7,7 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName }) => {
   const [tradeType, setTradeType] = useState("buy"); // "buy" or "sell"
   const [balance, setBalance] = useState({
     token: 0,
-    sol: 0.1209, // Example balance
+    eth: 0.1209, // Example balance
   });
 
   const handleAmountChange = (e) => {
@@ -28,7 +28,7 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName }) => {
 
   const handleMaxAmount = () => {
     if (tradeType === "buy") {
-      setAmount(balance.sol);
+      setAmount(balance.eth);
     } else {
       setAmount(balance.token);
     }
@@ -71,7 +71,7 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName }) => {
           <span>Balance:</span>
           <span>
             {tradeType === "buy"
-              ? `${balance.sol} SOL`
+              ? `${balance.eth} ETH`
               : `${balance.token} ${tokenSymbol}`}
           </span>
         </div>
@@ -84,7 +84,7 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName }) => {
             className="w-full bg-gray-800 border border-gray-700 rounded-lg p-2 text-white text-lg focus:outline-none focus:border-green-500"
           />
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-400 font-medium">
-            {tradeType === "buy" ? "SOL" : tokenSymbol}
+            {tradeType === "buy" ? "ETH" : tokenSymbol}
           </div>
         </div>
       </div>
