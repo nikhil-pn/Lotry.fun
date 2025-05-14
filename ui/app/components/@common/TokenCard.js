@@ -45,7 +45,7 @@ const TokenCard = ({ token }) => {
           </h3>
 
           {/* Lottery details */}
-          <div className="bg-green-900/30 rounded-lg p-3 mb-3">
+          {/* <div className="bg-green-900/30 rounded-lg p-3 mb-3">
             <div className="flex justify-between items-center mb-2">
               <span className="text-green-200">Pool Amount:</span>
               <span className="text-white font-bold text-lg">
@@ -58,7 +58,7 @@ const TokenCard = ({ token }) => {
                 {token.lotteryDate || "TBA"}
               </span>
             </div>
-          </div>
+          </div> */}
 
           {/* Ticket footer with serial number */}
           <div className="flex justify-center mt-2">
