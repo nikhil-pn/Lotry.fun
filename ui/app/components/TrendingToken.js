@@ -46,9 +46,9 @@ const TrendingToken = () => {
   const duplicatedTokens = [...tokens, ...tokens, ...tokens];
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-2 overflow-hidden">
-      <div className="infinite-scroll-container">
-        <div className="infinite-scroll-content">
+    <div className="w-full max-w-7xl mx-auto overflow-hidden">
+      <div className="ticket-scroll-container">
+        <div className="ticket-scroll">
           {duplicatedTokens.map((token, index) => (
             <TrendingTokenCard key={`${token.id}-${index}`} token={token} />
           ))}
@@ -56,18 +56,19 @@ const TrendingToken = () => {
       </div>
 
       <style jsx>{`
-        .infinite-scroll-container {
+        .ticket-scroll-container {
           width: 100%;
           overflow: hidden;
           position: relative;
+          height: 120px;
+          margin: 20px 0;
         }
 
-        .infinite-scroll-content {
+        .ticket-scroll {
           display: flex;
-          gap: 1rem;
           animation: scroll 30s linear infinite;
           width: max-content;
-          padding: 1rem;
+          height: 100%;
         }
 
         @keyframes scroll {
@@ -75,12 +76,12 @@ const TrendingToken = () => {
             transform: translateX(0);
           }
           100% {
-            transform: translateX(calc(-100% / 3));
+            transform: translateX(calc(-50%));
           }
         }
 
-        /* Pause animation on hover if desired */
-        .infinite-scroll-container:hover .infinite-scroll-content {
+        /* Pause animation on hover */
+        .ticket-scroll-container:hover .ticket-scroll {
           animation-play-state: paused;
         }
       `}</style>
