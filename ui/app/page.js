@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Navbar from "./components/Navbar"; // Corrected path
 import TokenList from "./components/tokenList";
+import TrendingToken from "./components/TrendingToken"; // Import the new component
 // import CreateLottery from "./components/CreateLottery"; // No longer directly used here
 
 export default function Home() {
@@ -37,8 +38,17 @@ export default function Home() {
           </button>
         </div>
       </main>
-      {/* Token List Section */}
+      {/* Trending Tokens Section */}
+      <div className="w-full py-6">
+        <h2 className="text-2xl font-bold mb-4 text-center text-green-300">
+          🔥 Trending Lotteries
+        </h2>
+        <TrendingToken />
+      </div>
+      {/* Token List Section - now for all/recent tokens */}
       <div className="w-full py-8">
+        {/* Changed title for this section */}
+        {/* <TokenList /> - We will ensure TokenList has its own title or adjust here */}
         <TokenList />
       </div>
       <footer className="h-10"></footer>
