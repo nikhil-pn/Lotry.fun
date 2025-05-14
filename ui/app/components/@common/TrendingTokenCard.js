@@ -18,7 +18,6 @@ const TrendingTokenCard = ({ token }) => {
           <div className="token-image">
             <img src={token.tokenImage} alt="token" />
           </div>
-          <div className="ticket-data"></div>
         </div>
       </div>
 
@@ -96,7 +95,7 @@ const TrendingTokenCard = ({ token }) => {
           letter-spacing: 2px;
           text-transform: uppercase;
           color: rgba(74, 222, 128, 0.3);
-          z-index: 1;
+         
         }
 
         .raffle div:before,
@@ -138,18 +137,7 @@ const TrendingTokenCard = ({ token }) => {
           z-index: 2;
         }
 
-        .ticket-content {
-          position: relative;
-          z-index: 3;
-          padding: 5px;
-          display: flex;
-          flex-direction: row;
-          justify-content: space-between;
-          align-items: center;
-          height: 100%;
-          width: 100%;
-        }
-
+    
         .token-image {
           width: 35%;
           height: 100%;
