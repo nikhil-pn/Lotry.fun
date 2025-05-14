@@ -42,14 +42,48 @@ const TrendingToken = () => {
     return <div className="text-center py-2">No trending tokens.</div>;
   }
 
+  // Duplicate tokens to create the illusion of infinite scrolling
+  const duplicatedTokens = [...tokens, ...tokens, ...tokens];
+
   return (
-    <div className="w-full max-w-4xl mx-auto px-2">
-      {/* The "ticket-style" layout will be primarily handled by CSS and TrendingTokenCard */}
-      <div className="flex flex-nowrap overflow-x-auto space-x-4 p-4 scrollbar-thin scrollbar-thumb-green-500 scrollbar-track-gray-700">
-        {tokens.map((token) => (
-          <TrendingTokenCard key={token.id} token={token} />
-        ))}
+    <div className="w-full max-w-7xl mx-auto px-2 overflow-hidden">
+      <div className="infinite-scroll-container">
+        <div className="infinite-scroll-content">
+          {duplicatedTokens.map((token, index) => (
+            <TrendingTokenCard key={`${token.id}-${index}`} token={token} />
+          ))}
+        </div>
       </div>
+
+      <style jsx>{`
+        .infinite-scroll-container {
+          width: 100%;
+          overflow: hidden;
+          position: relative;
+        }
+
+        .infinite-scroll-content {
+          display: flex;
+          gap: 1rem;
+          animation: scroll 30s linear infinite;
+          width: max-content;
+          padding: 1rem;
+        }
+
+        @keyframes scroll {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(calc(-100% / 3));
+          }
+        }
+
+        /* Pause animation on hover if desired */
+        .infinite-scroll-container:hover .infinite-scroll-content {
+          animation-play-state: paused;
+        }
+      `}</style>
     </div>
   );
 };

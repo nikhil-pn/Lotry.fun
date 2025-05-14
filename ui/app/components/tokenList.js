@@ -41,8 +41,8 @@ const TokenList = () => {
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto">
-      <h2 className="text-xl font-semibold mb-6 text-center">
+    <div className="w-full max-w-7xl mx-auto">
+      <h2 className="text-2xl font-bold mb-4 text-center text-green-300">
         Recent Tokens Available
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
