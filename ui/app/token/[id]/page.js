@@ -4,32 +4,32 @@
 import TokenTradingChart from "../../../components/TokenTradingChart";
 import TokenTradeInterface from "../../../components/TokenTradeInterface";
 import Navbar from "../../components/Navbar";
+import { fetchTokenById } from "../../utils/firebaseHelpers"; // Import the helper
+import { notFound } from 'next/navigation'; // Import for handling not found
 
 async function getTokenDetails(id) {
-  // In a real application, you would fetch token data based on the ID
-  // For now, we'll simulate fetching and just return the ID and some placeholder data
-  // console.log(`Fetching details for token: ${id}`);
-  // const res = await fetch(`https://your-api.com/tokens/${id}`);
-  // if (!res.ok) {
-  //   // This will activate the closest `error.js` Error Boundary
-  //   throw new Error('Failed to fetch token data');
-  // }
-  // const tokenData = await res.json();
-  // return tokenData;
+  const tokenData = await fetchTokenById(id);
+  if (!tokenData) {
+    // If tokenData is null (not found in Firebase or error fetching),
+    // trigger the 404 page.
+    notFound();
+  }
 
-  // Placeholder data structure
+  // We need to ensure the structure matches what the page expects.
+  // The firebaseHelpers.fetchTokenById returns the document directly.
+  // Let's adapt or ensure fields are present.
   return {
-    id: id,
-    name: `Token ${id.substring(0, 8)}...`,
-    description:
-      "This is a detailed description of the token. It includes information about its origins, utility, and the lottery it's associated with. Enjoy the thrill of the draw!",
-    imageUrl: "/placeholder-token-image.png", // Replace with a real or dynamic image path
-    lotteryPool: "1,000,000",
-    drawDate: "2024-12-31",
-    rules:
-      "1. Must be 18+ to participate.\n2. One entry per person.\n3. Winners announced on the draw date.",
-    ticker: id.substring(0, 3).toUpperCase(),
-    tradingViewSymbol: "NASDAQ:AAPL", // Placeholder
+    id: tokenData.id, // Firebase doc ID
+    name: tokenData.tokenName || `Token ${tokenData.id.substring(0, 8)}...`, // from Firebase
+    description: tokenData.description || "No description available.",
+    imageUrl: tokenData.tokenImage || "/placeholder-token-image.png", // from Firebase
+    lotteryPool: tokenData.lotteryPool?.toString() || "0", // from Firebase
+    drawDate: tokenData.lotteryDate || "N/A", // from Firebase
+    rules: tokenData.rules || "No rules specified.",
+    ticker: tokenData.ticker || tokenData.poolSymbol || tokenData.id.substring(0, 3).toUpperCase(), // from Firebase
+    tokenAddress: tokenData.tokenAddress, // CRUCIAL: This is the BondingCurvePool address from Firebase
+    tradingViewSymbol: tokenData.tradingViewSymbol || "NASDAQ:AAPL", // Placeholder or from Firebase if stored
+    // Add any other fields your page component expects that are stored in Firebase
   };
 }
 
@@ -73,6 +73,7 @@ export default async function TokenPage({ params }) {
               <TokenTradeInterface
                 tokenSymbol={token.ticker}
                 tokenName={token.name}
+                tokenAddress={token.tokenAddress}
               />
             </div>
 

@@ -11,6 +11,7 @@ import {
   useWaitForTransactionReceipt 
 } from "wagmi";
 import { config as wagmiConfig } from "../utils/wagmi";
+import { updateTokenOnLaunch } from "../utils/firebaseHelpers";
 
 // ABI for TokenLaunchpad
 const tokenLaunchpadABI = [
@@ -109,6 +110,7 @@ export default function CreateLottery({ onGoBack }) {
   const [imageUploading, setImageUploading] = useState(false); // Keep this state for tracking
 
   const { address: accountAddress, isConnected, chain } = useAccount(); // Get account status and chain from Wagmi
+  const [firebaseDocId, setFirebaseDocId] = useState(null); // Store Firebase Doc ID
 
   // Wagmi's write contract hook
   const { 
@@ -131,6 +133,7 @@ export default function CreateLottery({ onGoBack }) {
     setWebsiteLink("");
     setTwitterLink("");
     setShowOptionalFields(false);
+    setFirebaseDocId(null); // Reset Firebase Doc ID
   };
 
   // Handle image file selection
@@ -191,7 +194,7 @@ export default function CreateLottery({ onGoBack }) {
 
     // --- Firebase Data Saving ---
     // This happens before blockchain interaction. Consider if this order is preferred.
-    let firebaseDocId;
+    let currentFirebaseDocId; // Temporary variable for this function scope
     try {
       const lotteryData = {
         tokenName,
@@ -204,11 +207,15 @@ export default function CreateLottery({ onGoBack }) {
         websiteLink,
         twitterLink,
         createdAt: new Date(),
-        status: "pending_blockchain" // Initial status
+        status: "pending_blockchain", // Initial status
+        // tokenAddress will be added later after contract deployment
+        // Other chain-specific data like initialTokenPrice can be added here if needed
+        // For now, keeping it as it was, assuming it will be part of the update
       };
 
       const docRef = await addDoc(collection(db, "token"), lotteryData);
-      firebaseDocId = docRef.id;
+      currentFirebaseDocId = docRef.id;
+      setFirebaseDocId(docRef.id); // Set state for useEffect
       // Don't reset form or show full success yet, blockchain part follows.
       setSuccessMessage("Lottery data saved, preparing blockchain transaction...");
     } catch (dbError) {
@@ -255,7 +262,9 @@ export default function CreateLottery({ onGoBack }) {
       console.error("Smart contract call error (writeContractAsync): ", contractCallError);
       setError(`Blockchain transaction failed: ${contractCallError.shortMessage || contractCallError.message}`);
       // Optionally update Firebase status to "failed"
-      if (firebaseDocId) { /* updateDoc(doc(db, "token", firebaseDocId), { status: "blockchain_failed" }); */ }
+      if (currentFirebaseDocId) { 
+        updateTokenOnLaunch(currentFirebaseDocId, { status: "blockchain_failed", error: contractCallError.message }); 
+      }
       setIsSubmitting(false); // Overall submission stops if contract call fails to initiate
     }
     // Note: `isSubmitting` remains true if `writeContractAsync` was called successfully,
@@ -294,10 +303,8 @@ export default function CreateLottery({ onGoBack }) {
       console.log("Transaction confirmed:", receipt);
       const contractInterface = new ethers.Interface(tokenLaunchpadABI);
       let newLotteryName = tokenName; // Capture tokenName at time of effect run
-      if (typeof window !== "undefined") { // Try to get from form if available, else fallback needed
-        const formTokenName = document.getElementById('lottery-name')?.value;
-        if (formTokenName) newLotteryName = formTokenName;
-      }
+      const currentFormTokenName = document.getElementById('lottery-name')?.value;
+      if (currentFormTokenName) newLotteryName = currentFormTokenName;
 
       if (receipt.logs) {
         const eventTopic = ethers.id("TokenCreated(address,string,string)");
@@ -311,20 +318,42 @@ export default function CreateLottery({ onGoBack }) {
             const decodedEvent = contractInterface.parseLog({ topics: tokenCreatedLog.topics, data: tokenCreatedLog.data });
             if (decodedEvent && decodedEvent.args) {
               const newTokenAddress = decodedEvent.args.tokenAddress;
-              setSuccessMessage(`Lottery "${newLotteryName}" launched! Token: ${newTokenAddress}. Tx: ${txHash}`);
+              const poolName = decodedEvent.args.name;
+              const poolSymbol = decodedEvent.args.symbol;
+              
+              setSuccessMessage(`Lottery "${newLotteryName}" launched! Token Address: ${newTokenAddress}. Tx: ${txHash}`);
+              
+              // Update Firebase with the new tokenAddress and status
+              if (firebaseDocId) {
+                updateTokenOnLaunch(firebaseDocId, {
+                  tokenAddress: newTokenAddress, // This is the BondingCurvePool address
+                  poolName: poolName,           // Name of the token from event (should match input)
+                  poolSymbol: poolSymbol,         // Symbol of the token from event (should match input)
+                  status: "live",
+                  transactionHash: receipt.transactionHash,
+                  // Potentially add other details fetched from the new pool contract if needed
+                  // e.g., initialTokenPrice (though it was an input, might be good to confirm from event/contract)
+                });
+              } else {
+                console.warn("firebaseDocId not set, cannot update Firebase with tokenAddress");
+              }
               resetFormFields(); // Reset form on full success
             } else {
               setSuccessMessage(`Lottery "${newLotteryName}" launched! Tx: ${txHash}. (Could not parse event details)`);
+              if (firebaseDocId) updateTokenOnLaunch(firebaseDocId, { status: "blockchain_confirmed_event_parse_failed", transactionHash: receipt.transactionHash });
             }
           } catch (parseError) {
             setSuccessMessage(`Lottery "${newLotteryName}" launched! Tx: ${txHash}. (Error parsing event)`);
+            if (firebaseDocId) updateTokenOnLaunch(firebaseDocId, { status: "blockchain_confirmed_event_parse_error", transactionHash: receipt.transactionHash, error: parseError.message });
             console.error("Error parsing TokenCreated event:", parseError);
           }
         } else {
           setSuccessMessage(`Lottery "${newLotteryName}" launched! Tx: ${txHash}. (TokenCreated event not found in logs)`);
+          if (firebaseDocId) updateTokenOnLaunch(firebaseDocId, { status: "blockchain_confirmed_event_not_found", transactionHash: receipt.transactionHash });
         }
       } else {
         setSuccessMessage(`Lottery "${newLotteryName}" launched! Tx: ${txHash}. (No logs in receipt)`);
+        if (firebaseDocId) updateTokenOnLaunch(firebaseDocId, { status: "blockchain_confirmed_no_logs", transactionHash: receipt.transactionHash });
       }
       setIsSubmitting(false);
     }
@@ -332,13 +361,16 @@ export default function CreateLottery({ onGoBack }) {
     if (waitForReceiptError) {
       console.error("Error waiting for transaction receipt:", waitForReceiptError);
       setError(`Transaction confirmation failed: ${waitForReceiptError.shortMessage || waitForReceiptError.message}`);
+      if (firebaseDocId) {
+         updateTokenOnLaunch(firebaseDocId, { status: "blockchain_receipt_failed", error: waitForReceiptError.message });
+      }
       setSuccessMessage("");
       setIsSubmitting(false);
     }
   }, [
     txHash, writeContractError, isWriteContractPending, 
     receipt, isReceiptSuccess, isReceiptLoading, waitForReceiptError,
-    tokenName // Keep tokenName for messages if form is reset early
+    tokenName, firebaseDocId // Keep tokenName & firebaseDocId for messages/updates if form is reset early
   ]);
 
   // Determine overall loading state for the button
