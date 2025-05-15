@@ -122,9 +122,6 @@ export default async function TokenPage({ params }) {
                   <p className="text-xs text-green-200 font-mono">
                     Ticker: {token.ticker}
                   </p>
-                  <p className="text-xs text-green-200 font-mono">
-                    {token.description}
-                  </p>
                 </div>
               </div>
 
