@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { FaTrophy } from "react-icons/fa";
 import { WalletConnect } from "./WalletConnect.jsx";
 import LeaderboardModal from "./LeaderboardModal";
 
@@ -10,24 +11,25 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="w-full p-12 sm:p-6 flex justify-center sm:justify-between items-center sticky top-0 z-50 bg-black">
+      <header className="w-full p-12 sm:p-6 flex justify-center sm:justify-between items-center sticky top-0 z-50 bg-[#15161B]">
         <div className="text-3xl sm:text-2xl font-bold text-green-300">
           <Link href="/" passHref legacyBehavior>
             <a>LOTRY.FUN</a>
           </Link>
         </div>
         <div className="hidden sm:flex items-center gap-4">
+          <button
+            onClick={() => setIsLeaderboardOpen(true)}
+            className="bg-green-300 text-gray-600 font-semibold py-2 px-3 text-sm rounded-md hover:bg-green-400 transition-colors"
+            title="Leaderboard"
+          >
+            <FaTrophy className="text-lg" />
+          </button>
           <Link href="/create" passHref legacyBehavior>
             <a className="bg-green-300 text-gray-600 font-semibold py-2 px-3 text-sm rounded-md hover:bg-green-400 transition-colors">
               Create new lottery
             </a>
           </Link>
-          <button
-            onClick={() => setIsLeaderboardOpen(true)}
-            className="bg-green-300 text-gray-600 font-semibold py-2 px-3 text-sm rounded-md hover:bg-green-400 transition-colors"
-          >
-            Leaderboard
-          </button>
           <WalletConnect />
         </div>
       </header>

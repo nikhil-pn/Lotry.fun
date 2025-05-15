@@ -17,7 +17,7 @@ export default function Home() {
   // }, []);
 
   return (
-    <div className="flex flex-col min-h-screen items-center justify-center p-4 text-white ">
+    <div className="flex flex-col min-h-screen items-center justify-center p-4 text-white bg-[#15161B]">
       <Navbar /> {/* Use the Navbar component here */}
       {/* Main Content - Conditionally Rendered */}
       <main className="flex flex-col flex-grow items-center justify-center gap-6 text-center px-4">
