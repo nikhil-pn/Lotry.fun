@@ -40,8 +40,8 @@ export default function Home() {
       </main>
       {/* Trending Tokens Section */}
       <div className="w-full py-6">
-        <h2 className="text-2xl font-bold mb-4 text-center text-green-300">
-          🔥 Trending Lotteries
+        <h2 className="text-sm font-medium  text-left pl-16 text-gray-400">
+         Now trending
         </h2>
         <TrendingToken />
       </div>
