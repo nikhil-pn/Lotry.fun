@@ -66,7 +66,7 @@ export default async function TokenPage({ params }) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
           {/* Left Column - Trading Chart */}
           <div className="lg:col-span-2 bg-green-800/30 rounded-xl border border-green-600 shadow-lg overflow-hidden">
-            <h2 className="text-xl font-semibold text-green-300 p-4 border-b border-green-600">
+            <h2 className="text-md font-semibold text-green-100 p-4 border-b border-green-600">
               Token Chart
             </h2>
             <div className="h-full">
@@ -86,7 +86,7 @@ export default async function TokenPage({ params }) {
 
             {/* Token Info */}
             <div className="bg-green-800/30 rounded-xl border border-green-600 shadow-lg p-4">
-              <h2 className="text-xl font-semibold text-green-300 mb-3">
+              <h2 className="text-md font-semibold text-green-100 mb-3">
                 Token Information
               </h2>
 
@@ -143,7 +143,7 @@ export default async function TokenPage({ params }) {
               )}
 
               <div className="grid grid-cols-2 gap-2 my-3">
-                <div className="bg-green-900/40 p-2 rounded">
+                <div className="bg-green-900/40 p-2 rounded text-center">
                   <h3 className="text-sm font-medium text-green-300">
                     Lottery Pool
                   </h3>
@@ -151,11 +151,11 @@ export default async function TokenPage({ params }) {
                     {token.lotteryPool}
                   </p>
                 </div>
-                <div className="bg-green-900/40 p-2 rounded">
+                <div className="bg-green-900/40 p-2 rounded text-center">
                   <h3 className="text-sm font-medium text-green-300">
                     Draw Date
                   </h3>
-                  <p className="text-lg font-bold text-white font-mono">
+                  <p className="text-md font-medium text-white font-mono">
                     {new Date(token.lotteryDate) < new Date()
                       ? "Completed"
                       : token.lotteryDate}

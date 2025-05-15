@@ -41,7 +41,7 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName }) => {
   return (
     <div className="bg-green-800/30 rounded-xl border border-green-600 p-4 shadow-lg h-full flex flex-col">
       <div className="flex justify-between items-center mb-3">
-        <h2 className="text-xl font-semibold text-green-300">Trade</h2>
+        <h2 className="text-md font-semibold text-green-100">Trade</h2>
         <div className="flex space-x-2">
           <button
             onClick={() => handleTradeTypeChange("buy")}
