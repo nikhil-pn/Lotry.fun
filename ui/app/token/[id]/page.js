@@ -32,22 +32,22 @@ export default async function TokenPage({ params }) {
       <Navbar />
       <div className="max-w-7xl mx-auto">
         {/* Header with Token Info */}
-        <div className="mb-6 bg-green-800/20 rounded-xl p-4 border border-green-600/30">
+        <div className="mb-6 rounded-xl p-4 border ">
           <div className="flex items-center justify-center mb-2">
             {token.tokenImage && (
               <div className="mr-4">
                 <img
                   src={token.tokenImage}
                   alt={token.tokenName}
-                  className="w-16 h-16 rounded-lg object-cover border-2 border-green-500"
+                  className="w-16 h-16 rounded-lg object-cover border-2 "
                 />
               </div>
             )}
             <div className="text-center">
-              <h1 className="text-4xl font-bold text-green-300 tracking-wider">
+              <h1 className="text-4xl font-bold text-green-200 tracking-wider">
                 {token.tokenName}
               </h1>
-              <p className="text-green-200 mt-1 font-mono text-sm">
+              <p className="text-green-100 mt-1 font-mono text-sm">
                 ${token.ticker}
               </p>
             </div>
@@ -55,7 +55,7 @@ export default async function TokenPage({ params }) {
 
           {token.description && (
             <div className="mt-3 text-center max-w-2xl mx-auto">
-              <p className="text-green-100 text-sm italic">
+              <p className="text-green-100/80 text-sm italic">
                 {token.description || "No description provided"}
               </p>
             </div>
@@ -65,8 +65,8 @@ export default async function TokenPage({ params }) {
         {/* Main Content - Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
           {/* Left Column - Trading Chart */}
-          <div className="lg:col-span-2 bg-green-800/30 rounded-xl border border-green-600 shadow-lg overflow-hidden">
-            <h2 className="text-md font-semibold text-green-100 p-4 border-b border-green-600">
+          <div className="lg:col-span-2 0 rounded-xl border  shadow-lg overflow-hidden">
+            <h2 className="text-md font-semibold text-green-100 p-4 border-b border-green-200/30">
               Token Chart
             </h2>
             <div className="h-full">
@@ -85,13 +85,13 @@ export default async function TokenPage({ params }) {
             </div>
 
             {/* Token Info */}
-            <div className="bg-green-800/30 rounded-xl border border-green-600 shadow-lg p-4">
+            <div className=" rounded-xl border  shadow-lg p-4">
               <h2 className="text-md font-semibold text-green-100 mb-3">
                 Token Information
               </h2>
 
               <div className="flex items-center mb-4">
-                <div className="w-16 h-16 bg-green-700 rounded-lg shadow-lg overflow-hidden border border-green-600 flex items-center justify-center mr-4">
+                <div className="w-16 h-16  rounded-lg shadow-lg overflow-hidden border border-green-300 flex items-center justify-center mr-4">
                   {token.tokenImage ? (
                     <img
                       src={token.tokenImage}
@@ -101,7 +101,7 @@ export default async function TokenPage({ params }) {
                   ) : (
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-10 w-10 text-green-400"
+                      className="h-10 w-10 text-green-200"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -116,10 +116,10 @@ export default async function TokenPage({ params }) {
                   )}
                 </div>
                 <div>
-                  <h3 className="text-lg font-medium text-green-300">
+                  <h3 className="text-lg font-medium text-green-200">
                     {token.tokenName}
                   </h3>
-                  <p className="text-xs text-green-200 font-mono">
+                  <p className="text-xs text-green-100 font-mono">
                     Ticker: {token.ticker}
                   </p>
                 </div>
@@ -140,16 +140,16 @@ export default async function TokenPage({ params }) {
               )}
 
               <div className="grid grid-cols-2 gap-2 my-3">
-                <div className="bg-green-900/40 p-2 rounded text-center">
-                  <h3 className="text-sm font-medium text-green-300">
+                <div className="bg-green-200/10 p-2 rounded text-center">
+                  <h3 className="text-sm font-medium text-green-200">
                     Lottery Pool
                   </h3>
                   <p className="text-lg font-bold text-white">
                     {token.lotteryPool}
                   </p>
                 </div>
-                <div className="bg-green-900/40 p-2 rounded text-center">
-                  <h3 className="text-sm font-medium text-green-300">
+                <div className="bg-green-200/10 p-2 rounded text-center">
+                  <h3 className="text-sm font-medium text-green-200">
                     Draw Date
                   </h3>
                   <p className="text-md font-medium text-white font-mono">
@@ -164,8 +164,8 @@ export default async function TokenPage({ params }) {
               {(token.websiteLink ||
                 token.twitterLink ||
                 token.telegramLink) && (
-                <div className="bg-green-900/40 p-2 rounded">
-                  <h3 className="text-sm font-medium text-green-300 mb-2">
+                <div className="bg-green-200/10 p-2 rounded">
+                  <h3 className="text-sm font-medium text-green-200 mb-2">
                     Social Links
                   </h3>
                   <div className="flex gap-3">
@@ -174,7 +174,7 @@ export default async function TokenPage({ params }) {
                         href={token.websiteLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-green-300 hover:text-white transition-colors"
+                        className="text-green-200 hover:text-white transition-colors"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -197,7 +197,7 @@ export default async function TokenPage({ params }) {
                         href={token.twitterLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-green-300 hover:text-white transition-colors"
+                        className="text-green-200 hover:text-white transition-colors"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -214,7 +214,7 @@ export default async function TokenPage({ params }) {
                         href={token.telegramLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-green-300 hover:text-white transition-colors"
+                        className="text-green-200 hover:text-white transition-colors"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
