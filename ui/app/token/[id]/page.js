@@ -28,7 +28,7 @@ export default async function TokenPage({ params }) {
 
   // Basic styling for the page - you can expand this with Tailwind CSS classes
   return (
-    <div className="min-h-screen bg-black text-white p-4">
+    <div className="min-h-screen bg-[#15161B] text-white p-4">
       <Navbar />
       <div className="max-w-7xl mx-auto">
         {/* Header with Token Info */}
