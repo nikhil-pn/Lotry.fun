@@ -9,8 +9,15 @@ export default function CountdownTimer({ targetDate }) {
     minutes: 0,
     seconds: 0,
   });
+  const [isLotteryComplete, setIsLotteryComplete] = useState(false);
 
   useEffect(() => {
+    // Check if the target date is '000', which indicates lottery is complete
+    if (targetDate === "000") {
+      setIsLotteryComplete(true);
+      return;
+    }
+
     const calculateTimeLeft = () => {
       const difference = new Date(targetDate) - new Date();
 
@@ -42,6 +49,23 @@ export default function CountdownTimer({ targetDate }) {
     // Clear interval on component unmount
     return () => clearInterval(timer);
   }, [targetDate]);
+
+  // If lottery is complete, show message instead of countdown
+  if (isLotteryComplete) {
+    return (
+      <div className="bg-green-500/20 p-3 rounded">
+        <h3 className="text-sm font-medium text-green-300 mb-2">
+          Lottery Status
+        </h3>
+        <div className="text-center py-2">
+          <span className="text-white font-bold">Lottery Complete!</span>
+          <p className="text-green-300 text-xs mt-1">
+            The winner has been selected
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-green-900/40 p-3 rounded">

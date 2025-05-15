@@ -5,6 +5,7 @@ import TokenTradingChart from "../../../components/TokenTradingChart";
 import TokenTradeInterface from "../../../components/TokenTradeInterface";
 import Navbar from "../../components/Navbar";
 import CountdownTimer from "../../../components/CountdownTimer";
+import LotteryWinner from "../../../components/LotteryWinner";
 import { getTokenData } from "../actions";
 import { notFound } from "next/navigation";
 
@@ -21,6 +22,9 @@ export default async function TokenPage({ params }) {
 
   // Default trading view symbol if not specified in token data
   const tradingViewSymbol = token.tradingViewSymbol || "NASDAQ:AAPL";
+
+  // Check if lottery is complete
+  const isLotteryComplete = token.lotteryDate === "000";
 
   // Basic styling for the page - you can expand this with Tailwind CSS classes
   return (
@@ -103,6 +107,15 @@ export default async function TokenPage({ params }) {
               {/* Countdown Timer (replaces Rules section) */}
               <CountdownTimer targetDate={token.lotteryDate} />
 
+              {/* Lottery Winner Section - Shows only when lottery is complete */}
+              {!isLotteryComplete && (
+                <LotteryWinner
+                  tokenId={token.id}
+                  tokenName={token.tokenName}
+                  lotteryPool={token.lotteryPool}
+                />
+              )}
+
               <div className="grid grid-cols-2 gap-2 my-3">
                 <div className="bg-green-900/40 p-2 rounded">
                   <h3 className="text-sm font-medium text-green-300">
@@ -117,7 +130,9 @@ export default async function TokenPage({ params }) {
                     Draw Date
                   </h3>
                   <p className="text-lg font-bold text-white font-mono">
-                    {token.lotteryDate}
+                    {new Date(token.lotteryDate) < new Date()
+                      ? "Completed"
+                      : token.lotteryDate}
                   </p>
                 </div>
               </div>
