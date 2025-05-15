@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { FaTrophy } from "react-icons/fa";
 
 export default function LeaderboardModal({ isOpen, onClose }) {
   // Animation states
@@ -100,7 +101,10 @@ export default function LeaderboardModal({ isOpen, onClose }) {
 
             {/* Header */}
             <div className="ticket-header">
-              <h2 className="ticket-title">🏆 LEADERBOARD 🏆</h2>
+              <h2 className="ticket-title">
+                <FaTrophy className="text-3xl inline-block mr-2" /> <span className="text-2xl font-bold">LEADERBOARD</span>{" "}
+                <FaTrophy className="text-3xl inline-block " />
+              </h2>
             </div>
 
             {/* Content */}
