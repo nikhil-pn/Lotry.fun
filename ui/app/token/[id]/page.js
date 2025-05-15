@@ -31,14 +31,35 @@ export default async function TokenPage({ params }) {
     <div className="min-h-screen bg-black text-white p-4">
       <Navbar />
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-4xl font-bold text-center text-green-300 tracking-wider">
-            {token.tokenName}
-          </h1>
-          <p className="text-center text-green-200 mt-2 font-mono text-sm">
-            TICKER: {token.ticker}
-          </p>
+        {/* Header with Token Info */}
+        <div className="mb-6 bg-green-800/20 rounded-xl p-4 border border-green-600/30">
+          <div className="flex items-center justify-center mb-2">
+            {token.tokenImage && (
+              <div className="mr-4">
+                <img
+                  src={token.tokenImage}
+                  alt={token.tokenName}
+                  className="w-16 h-16 rounded-lg object-cover border-2 border-green-500"
+                />
+              </div>
+            )}
+            <div className="text-center">
+              <h1 className="text-4xl font-bold text-green-300 tracking-wider">
+                {token.tokenName}
+              </h1>
+              <p className="text-green-200 mt-1 font-mono text-sm">
+                ${token.ticker}
+              </p>
+            </div>
+          </div>
+
+          {token.description && (
+            <div className="mt-3 text-center max-w-2xl mx-auto">
+              <p className="text-green-100 text-sm italic">
+                {token.description || "No description provided"}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Main Content - Grid Layout */}
@@ -99,16 +120,21 @@ export default async function TokenPage({ params }) {
                     {token.tokenName}
                   </h3>
                   <p className="text-xs text-green-200 font-mono">
-                    ID: #{token.id.substring(0, 8)}...
+                    Ticker: {token.ticker}
+                  </p>
+                  <p className="text-xs text-green-200 font-mono">
+                    {token.description}
                   </p>
                 </div>
               </div>
 
               {/* Countdown Timer (replaces Rules section) */}
-              <CountdownTimer targetDate={token.lotteryDate} />
+              {!isLotteryComplete && (
+                <CountdownTimer targetDate={token.lotteryDate} />
+              )}
 
               {/* Lottery Winner Section - Shows only when lottery is complete */}
-              {!isLotteryComplete && (
+              {isLotteryComplete && (
                 <LotteryWinner
                   tokenId={token.id}
                   tokenName={token.tokenName}
@@ -136,18 +162,6 @@ export default async function TokenPage({ params }) {
                   </p>
                 </div>
               </div>
-
-              {token.description && (
-                <div className="bg-green-900/40 p-2 rounded mb-3">
-                  <h3 className="text-sm font-medium text-green-300">
-                    Description
-                  </h3>
-                  <p className="text-xs text-green-100 leading-tight">
-                    {token.description.substring(0, 100)}
-                    {token.description.length > 100 ? "..." : ""}
-                  </p>
-                </div>
-              )}
 
               {/* Social Links */}
               {(token.websiteLink ||
