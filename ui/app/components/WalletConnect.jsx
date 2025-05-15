@@ -43,6 +43,7 @@ export function WalletConnect() {
   });
   const [message, setMessage] = useState(undefined);
   const [valid, setValid] = useState(undefined);
+  const [isHovering, setIsHovering] = useState(false);
 
   const checkValid = useCallback(async () => {
     if (!signature || !account.address || !client || !message) return;
@@ -89,17 +90,14 @@ export function WalletConnect() {
           Connect Wallet
         </button>
       ) : (
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-mono bg-gray-700 text-green-300 py-1 px-2 rounded">
-            {shortenAddress(account.address)}
-          </span>
-          <button
-            onClick={handleDisconnect}
-            className="bg-green-300 text-gray-600 font-semibold py-2 px-3 text-sm rounded-md hover:bg-green-400 transition-colors"
-          >
-            Disconnect
-          </button>
-        </div>
+        <button
+          onClick={handleDisconnect}
+          className="bg-green-300 text-gray-600 font-semibold py-2 px-3 text-sm rounded-md hover:bg-red-400 transition-colors"
+          onMouseEnter={() => setIsHovering(true)}
+          onMouseLeave={() => setIsHovering(false)}
+        >
+          {isHovering ? "Disconnect" : shortenAddress(account.address)}
+        </button>
       )}
     </div>
   );
