@@ -1,6 +1,7 @@
 "use client"; // Add if any client-side interactions are planned for Navbar, good practice for components
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { FaTrophy } from "react-icons/fa";
 import { WalletConnect } from "./WalletConnect.jsx";
@@ -11,10 +12,12 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="w-full p-12 sm:p-6 flex justify-center sm:justify-between items-center sticky top-0 z-50 bg-[#15161B]">
-        <div className="text-3xl sm:text-2xl font-bold text-green-300">
+      <header className="w-full h-[100px] flex justify-center sm:justify-between items-center top-0 z-50 bg-[#15161B] border-b border-white/10 mb-8">
+        <div className="p-10">
           <Link href="/" passHref legacyBehavior>
-            <a>LOTRY.FUN</a>
+            <a className="flex items-center">
+              <img src="/lotryleaf.png" alt="LOTRY.FUN Logo" className="w-[160px] h-[160px]" />
+            </a>
           </Link>
         </div>
         <div className="hidden sm:flex items-center gap-4">

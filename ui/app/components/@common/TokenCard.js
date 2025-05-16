@@ -36,7 +36,23 @@ const TokenCard = ({ token }) => {
           <div className="ticket-body">
             <h3 className="token-name">{token.tokenName || "Unnamed Token"}</h3>
 
-            {/* Ticket footer with serial number */}
+            <div className="token-stats">
+              <div className="market-cap">
+                <span className="stat-label">market cap:</span>
+                <span className="stat-value">${token.marketCap || "0"}</span>
+              </div>
+              <div className="replies">
+                <span className="stat-label">replies:</span>
+                <span className="stat-value">{token.replies || "0"}</span>
+              </div>
+            </div>
+
+            {/* Token description */}
+            {token.description && (
+              <p className="token-description">{token.description}</p>
+            )}
+
+            {/* Ticket footer with lottery pool */}
             <div className="ticket-serial">
               <span className="serial-number">
                 Lottery Pool: {token.lotteryPool || "000000"} ETH
@@ -49,170 +65,167 @@ const TokenCard = ({ token }) => {
         <style jsx>{`
           .lottery-ticket-card {
             width: 100%;
-            height: 330px;
+            height: 100%;
             position: relative;
             perspective: 1000px;
             margin: 0 auto;
-            transition: transform 0.3s;
+            transition: transform 0.3s ease;
+            cursor: pointer;
           }
 
           .lottery-ticket-card:hover {
-            transform: translateY(-10px);
+            transform: translateY(-5px);
           }
 
           .ticket-inner {
-            width: 100%;
-            height: 100%;
-            background-color: #1f2937;
+            background: #1e1e24;
             border-radius: 16px;
+            border: 1px solid #333;
             overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+            height: 100%;
             display: flex;
             flex-direction: column;
             position: relative;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+          }
 
-            /* Curved corners using radial gradient */
-            background-image: radial-gradient(
-                circle at top left,
-                transparent 15px,
-                #4ade80 15px
-              ),
-              radial-gradient(
-                circle at top right,
-                transparent 15px,
-                #4ade80 15px
-              ),
-              radial-gradient(
-                circle at bottom left,
-                transparent 15px,
-                #4ade80 15px
-              ),
-              radial-gradient(
-                circle at bottom right,
-                transparent 15px,
-                #4ade80 15px
-              );
-            background-size: 50% 50%;
-            background-position: top left, top right, bottom left, bottom right;
-            background-repeat: no-repeat;
-            border: 2px solid #4ade80;
+          .ticket-inner::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #22c55e, #16a34a);
           }
 
           .ticket-header {
-            padding: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px dashed #4ade80;
-            z-index: 1;
+            padding: 12px 16px;
+            border-bottom: 1px dashed #333;
           }
 
           .header-content {
             display: flex;
             align-items: center;
+            gap: 8px;
           }
 
           .lottery-badge {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
             width: 24px;
             height: 24px;
-            border-radius: 50%;
-            background-color: #4ade80;
-            color: #134e4a;
-            font-weight: bold;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 8px;
+            border-radius: 50%;
+            font-weight: bold;
+            color: white;
+            font-size: 14px;
           }
 
           .lottery-text {
-            font-weight: bold;
-            color: #4ade80;
-            font-size: 0.8rem;
+            font-size: 12px;
+            text-transform: uppercase;
             letter-spacing: 1px;
+            font-weight: 600;
+            color: #9ca3af;
           }
 
           .ticker-symbol {
-            color: #4ade80;
-            font-family: monospace;
             font-weight: bold;
+            font-size: 18px;
+            color: #22c55e;
+            text-transform: uppercase;
           }
 
           .token-image-container {
-            position: relative;
-            height: 160px;
+            padding: 20px 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            border-bottom: 2px dashed #4ade80;
-            padding: 15px;
-            overflow: hidden;
           }
 
           .token-image {
-            border-radius: 50%;
-            border: 3px solid #4ade80;
-            object-fit: cover;
+            border: 2px solid #22c55e;
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.3);
           }
 
           .no-image {
             width: 120px;
             height: 120px;
             border-radius: 50%;
-            background-color: #134e4a;
+            background: #333;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #4ade80;
-            border: 3px solid #4ade80;
+            color: #9ca3af;
+            border: 2px solid #22c55e;
           }
 
           .ticket-body {
+            padding: 0 16px 16px;
             flex: 1;
-            padding: 15px;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            background: linear-gradient(to bottom, #1f2937, #111827);
           }
 
           .token-name {
-            font-weight: bold;
-            font-size: 1.2rem;
-            color: white;
             text-align: center;
-            margin-bottom: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            margin: 0 0 12px;
+            color: white;
+          }
+
+          .token-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+          }
+
+          .market-cap,
+          .replies {
+            display: flex;
+            flex-direction: column;
+          }
+
+          .stat-label {
+            color: #9ca3af;
+            font-size: 14px;
+          }
+
+          .stat-value {
+            color: #22c55e;
+            font-weight: 600;
+          }
+
+          .token-description {
+            font-size: 14px;
+            color: #d1d5db;
+            margin-bottom: 12px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
           }
 
           .ticket-serial {
+            margin-top: auto;
+            border-top: 1px dashed #333;
+            padding-top: 10px;
             display: flex;
             justify-content: center;
-            margin-top: auto;
           }
 
           .serial-number {
             font-family: monospace;
-            font-size: 0.8rem;
-            color: #4ade80;
-            background-color: rgba(74, 222, 128, 0.1);
-            padding: 4px 12px;
-            border-radius: 20px;
-            border: 1px solid #4ade80;
-          }
-
-          /* Edge decoration removed */
-
-          /* Add dotted pattern for ticket effect */
-          .token-image-container:after {
-            content: "";
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            background-image: radial-gradient(#ffffff10 1px, transparent 1px);
-            background-size: 8px 8px;
-            pointer-events: none;
+            font-size: 14px;
+            color: #9ca3af;
+            letter-spacing: 0.5px;
           }
         `}</style>
       </div>
