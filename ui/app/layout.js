@@ -36,7 +36,7 @@ const frameMetadata = {
 };
 
 export const metadata = {
-  title: "LOTRY.FUN",
+  title: "LOTRY",
   description: "Create and participate in fun lotteries!",
   metadataBase: new URL(defaultUrl),
   other: {
