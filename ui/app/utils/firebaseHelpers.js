@@ -1,13 +1,5 @@
 import { db } from "../../lib/firebase";
-import {
-  collection,
-  getDocs,
-  query,
-  orderBy,
-  limit,
-  doc,
-  getDoc,
-} from "firebase/firestore";
+import { collection, getDocs, query, orderBy, limit, doc, getDoc, updateDoc } from "firebase/firestore";
 
 /**
  * Fetches tokens from the Firebase 'token' collection
@@ -36,26 +28,41 @@ export const fetchTokens = async (limitCount = 10) => {
 };
 
 /**
- * Fetches a single token by ID from the Firebase 'token' collection
- * @param {string} tokenId - ID of the token to fetch
- * @returns {Promise<Object|null>} - Token object or null if not found
+ * Fetches a single token from the Firebase 'token' collection by its document ID.
+ * @param {string} id - The document ID of the token in Firebase.
+ * @returns {Promise<Object|null>} - Token object if found, otherwise null.
  */
-export const fetchTokenById = async (tokenId) => {
+export const fetchTokenById = async (id) => {
   try {
-    const tokenRef = doc(db, "token", tokenId);
-    const tokenSnapshot = await getDoc(tokenRef);
+    const tokenRef = doc(db, "token", id);
+    const docSnap = await getDoc(tokenRef);
 
-    if (tokenSnapshot.exists()) {
-      return {
-        id: tokenSnapshot.id,
-        ...tokenSnapshot.data(),
-      };
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() };
     } else {
-      console.log(`Token with ID ${tokenId} not found`);
+      console.warn(`No token found with ID: ${id}`);
       return null;
     }
   } catch (error) {
-    console.error(`Error fetching token with ID ${tokenId}:`, error);
+    console.error("Error fetching token by ID:", error);
     return null;
+  }
+};
+
+/**
+ * Updates a token document in Firebase, typically after blockchain confirmation.
+ * @param {string} docId - The Firebase document ID of the token to update.
+ * @param {Object} dataToUpdate - An object containing fields to update (e.g., tokenAddress, status).
+ * @returns {Promise<boolean>} - True if update was successful, false otherwise.
+ */
+export const updateTokenOnLaunch = async (docId, dataToUpdate) => {
+  try {
+    const tokenRef = doc(db, "token", docId);
+    await updateDoc(tokenRef, dataToUpdate);
+    console.log(`Token document ${docId} updated successfully with:`, dataToUpdate);
+    return true;
+  } catch (error) {
+    console.error(`Error updating token document ${docId}:`, error);
+    return false;
   }
 };

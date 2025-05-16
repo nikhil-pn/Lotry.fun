@@ -7,7 +7,7 @@ import Navbar from "../../components/Navbar";
 import CountdownTimer from "../../../components/CountdownTimer";
 import LotteryWinner from "../../../components/LotteryWinner";
 import { getTokenData } from "../actions";
-import { notFound } from "next/navigation";
+import { notFound } from 'next/navigation'; // Import for handling not found
 
 export default async function TokenPage({ params }) {
   // Await params before destructuring
@@ -83,6 +83,7 @@ export default async function TokenPage({ params }) {
               <TokenTradeInterface
                 tokenSymbol={token.ticker}
                 tokenName={token.tokenName}
+                tokenAddress={token.tokenAddress}
               />
             </div>
 
