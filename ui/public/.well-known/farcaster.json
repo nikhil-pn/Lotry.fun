@@ -2,11 +2,11 @@
     "frame": {
       "version": "1",
       "name": "Lotry!",
-      "iconUrl": "https://lotry-fun.vercel.app/claw.png",
+      "iconUrl": "https://lotry-fun.vercel.app/lotryleaf.png",
       "homeUrl": "https://lotry-fun.vercel.app/",
       "imageUrl": "https://lotry-fun.vercel.app/lotryleaf.png",
       "buttonTitle": "🚩 Start",
-      "splashImageUrl": "https://lotry-fun.vercel.app/claw.png",
+      "splashImageUrl": "https://lotry-fun.vercel.app/lotryleaf.png",
       "splashBackgroundColor": "#f5f0ec"
     },
     "accountAssociation": {
