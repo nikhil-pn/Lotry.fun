@@ -12,7 +12,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="w-full h-[100px] flex justify-center sm:justify-between items-center top-0 z-50 bg-[#15161B] border-b border-white/10 mb-8">
+      <header className="w-full h-[100px] flex justify-center sm:justify-between items-center top-0 z-50 bg-[#15161B]  mb-8">
         <div className="p-10">
           <Link href="/" passHref legacyBehavior>
             <a className="flex items-center">
