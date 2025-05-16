@@ -164,6 +164,7 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
   const [expectedReturn, setExpectedReturn] = useState("0"); // For buy/sell calculation
   const [tokenDecimals, setTokenDecimals] = useState(18); // Default to 18, fetch if different
   const [bondingCurveProgress, setBondingCurveProgress] = useState(0); // Added for bonding curve progress
+  const [marketCap, setMarketCap] = useState("0"); // Added for market cap
 
   const { address: accountAddress, isConnected, chain } = useAccount();
 
@@ -238,6 +239,15 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
     address: tokenAddress,
     abi: BondingCurvePoolABI,
     functionName: 'lotteryPool',
+  });
+
+  // Fetch virtualTokenReserve
+  const { data: virtualTokenReserveData } = useReadContract({
+    address: tokenAddress,
+    abi: BondingCurvePoolABI,
+    functionName: 'virtualTokenReserve',
+    chainId: BASE_SEPOLIA_CHAIN_ID,
+    enabled: !!tokenAddress,
   });
 
   // Fetch contract's token balance (tokens left in bonding curve)
@@ -334,6 +344,21 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
       setBondingCurveProgress((Number(ethRaised) / Number(LotteryPool))*100);
     }
   }, [initialSupplyData, contractTokenBalanceData, tokenDecimals]);
+
+  // Calculate market cap
+  useEffect(() => {
+    if (virtualTokenReserveData && currentTokenPrice && tokenDecimals > 0) {
+      try {
+        const reserve = parseFloat(ethers.formatUnits(virtualTokenReserveData, tokenDecimals));
+        const price = parseFloat(currentTokenPrice);
+        const calculatedMarketCap = reserve * price;
+        setMarketCap(calculatedMarketCap.toFixed(4));
+      } catch (e) {
+        console.error("Error calculating market cap:", e);
+        setMarketCap("0");
+      }
+    }
+  }, [virtualTokenReserveData, currentTokenPrice, tokenDecimals]);
 
   const handleAmountChange = (e) => {
     const val = e.target.value;
@@ -553,8 +578,11 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
       <div className="mb-1 text-xs text-gray-400">
         Current Price: {parseFloat(currentTokenPrice).toFixed(10)} ETH/{tokenSymbol}
       </div>
-      {tokenAddress && <div className="mb-3 text-xs text-gray-500 truncate" title={tokenAddress}>Pool: {tokenAddress}</div>}
-      <div className="mb-1 text-xs text-green-400">
+      {tokenAddress && <div className="mb-1 text-xs text-gray-500 truncate" title={tokenAddress}>Pool: {tokenAddress}</div>}
+      <div className="mb-1 text-xs text-gray-400">
+        Market Cap: {marketCap} ETH
+      </div>
+      <div className="mb-3 text-xs text-green-400">
         Bonding Curve Progress: {bondingCurveProgress.toFixed(2)}%
       </div>
       <div className="w-full bg-gray-700 rounded-full h-5 mb-6">
