@@ -1,6 +1,6 @@
 "use client";
 
-// import { sdk } from "@farcaster/frame-sdk"; // This seems unused now, can be removed if not needed elsewhere
+import { sdk } from "@farcaster/frame-sdk"; // This seems unused now, can be removed if not needed elsewhere
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Navbar from "./components/Navbar"; // Corrected path
@@ -12,9 +12,9 @@ export default function Home() {
   // const [showCreateForm, setShowCreateForm] = useState(false); // Removed state
   const [currentLottery, setCurrentLottery] = useState(null);
 
-  // useEffect(() => {
-  //   sdk.actions.ready(); // This seems unused now
-  // }, []);
+  useEffect(() => {
+    sdk.actions.ready(); // This seems unused now
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen items-center justify-center p-4 text-white bg-[#15161B]">
