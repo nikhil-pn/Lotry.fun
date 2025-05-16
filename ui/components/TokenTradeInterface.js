@@ -514,25 +514,25 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
 
       <div className="grid grid-cols-4 gap-2 mb-3">
         <button
-          onClick={() => handlePresetAmount(tradeType === "buy" ? "0.01" : "10")}
+          onClick={() => handlePresetAmount(tradeType === "buy" ? "0.01" : Number(userTokenBalance * 0.1).toString())}
           className="bg-gray-800 hover:bg-gray-700 text-gray-300 py-1 rounded text-sm"
           disabled={isLoading}
         >
-          {tradeType === "buy" ? "0.01" : "10"}
+          {tradeType === "buy" ? "0.01" : "10%"}
         </button>
         <button
-          onClick={() => handlePresetAmount(tradeType === "buy" ? "0.05" : "50")}
+          onClick={() => handlePresetAmount(tradeType === "buy" ? "0.05" : Number(userTokenBalance * 0.5).toString())}
           className="bg-gray-800 hover:bg-gray-700 text-gray-300 py-1 rounded text-sm"
           disabled={isLoading}
         >
-          {tradeType === "buy" ? "0.05" : "50"}
+          {tradeType === "buy" ? "0.05" : "50%"}
         </button>
         <button
-          onClick={() => handlePresetAmount(tradeType === "buy" ? "0.1" : "100")}
+          onClick={() => handlePresetAmount(tradeType === "buy" ? "0.1" : Number(userTokenBalance * 0.75).toString())}
           className="bg-gray-800 hover:bg-gray-700 text-gray-300 py-1 rounded text-sm"
           disabled={isLoading}
         >
-          {tradeType === "buy" ? "0.1" : "100"}
+          {tradeType === "buy" ? "0.1" : "75%"}
         </button>
         <button
           onClick={handleMaxAmount}
