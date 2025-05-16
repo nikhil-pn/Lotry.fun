@@ -11,7 +11,7 @@ const TokenTradingChart = ({ symbol }) => {
   //   );
   // }
 
-  const testSymbol = "BITSTAMP:BTCUSD"; // Using a common, hardcoded symbol for testing
+  // const testSymbol = "BITSTAMP:BTCUSD"; // Using a common, hardcoded symbol for testing
 
   return (
     <div className="h-[calc(100%-56px)]">
@@ -19,7 +19,7 @@ const TokenTradingChart = ({ symbol }) => {
       {/* Adjust height to account for header */}
       <AdvancedRealTimeChart
         theme="dark"
-        symbol={testSymbol} // Using the hardcoded test symbol
+        symbol={symbol}
         autosize
         // You can customize other props here:
         // interval="D"

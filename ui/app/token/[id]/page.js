@@ -72,7 +72,7 @@ export default async function TokenPage({ params }) {
               Token Chart
             </h2>
             <div className="h-full">
-              <TokenTradingChart symbol={tradingViewSymbol} />
+              <TokenTradingChart symbol={token.ticker} />
             </div>
           </div>
 
