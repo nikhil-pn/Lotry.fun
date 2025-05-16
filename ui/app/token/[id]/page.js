@@ -7,34 +7,7 @@ import Navbar from "../../components/Navbar";
 import CountdownTimer from "../../../components/CountdownTimer";
 import LotteryWinner from "../../../components/LotteryWinner";
 import { getTokenData } from "../actions";
-import { fetchTokenById } from "../../utils/firebaseHelpers"; // Import the helper
 import { notFound } from 'next/navigation'; // Import for handling not found
-
-async function getTokenDetails(id) {
-  const tokenData = await fetchTokenById(id);
-  if (!tokenData) {
-    // If tokenData is null (not found in Firebase or error fetching),
-    // trigger the 404 page.
-    notFound();
-  }
-
-  // We need to ensure the structure matches what the page expects.
-  // The firebaseHelpers.fetchTokenById returns the document directly.
-  // Let's adapt or ensure fields are present.
-  return {
-    id: tokenData.id, // Firebase doc ID
-    name: tokenData.tokenName || `Token ${tokenData.id.substring(0, 8)}...`, // from Firebase
-    description: tokenData.description || "No description available.",
-    imageUrl: tokenData.tokenImage || "/placeholder-token-image.png", // from Firebase
-    lotteryPool: tokenData.lotteryPool?.toString() || "0", // from Firebase
-    drawDate: tokenData.lotteryDate || "N/A", // from Firebase
-    rules: tokenData.rules || "No rules specified.",
-    ticker: tokenData.ticker || tokenData.poolSymbol || tokenData.id.substring(0, 3).toUpperCase(), // from Firebase
-    tokenAddress: tokenData.tokenAddress, // CRUCIAL: This is the BondingCurvePool address from Firebase
-    tradingViewSymbol: tokenData.tradingViewSymbol || "NASDAQ:AAPL", // Placeholder or from Firebase if stored
-    // Add any other fields your page component expects that are stored in Firebase
-  };
-}
 
 export default async function TokenPage({ params }) {
   // Await params before destructuring
