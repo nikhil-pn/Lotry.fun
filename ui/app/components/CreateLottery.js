@@ -87,7 +87,7 @@ const tokenLaunchpadABI = [
 ];
 
 // Contract Address deployed on Base Sepolia with wallet 0xC43389A2B7eB3e5540FDC734dA7205A215551d01
-const contractAddress = "0xB6A265C087A7dF387dB167c52005AeB4f6C538C9";
+const contractAddress = "0x309dC64c713c1E690a1BBf426A1c5732873b94b7";
 
 export default function CreateLottery({ onGoBack }) {
   const [tokenName, setTokenName] = useState("");

@@ -224,6 +224,22 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
     enabled: !!tokenAddress,
   });
 
+  // Fetch ethRaised
+  const { data: ethRaised } = useReadContract({
+    address: tokenAddress,
+    abi: BondingCurvePoolABI,
+    functionName: 'ethRaised',
+    chainId: BASE_SEPOLIA_CHAIN_ID,
+    enabled: !!tokenAddress,
+  });
+
+  // Fetch LotteryPool
+  const { data: LotteryPool } = useReadContract({
+    address: tokenAddress,
+    abi: BondingCurvePoolABI,
+    functionName: 'lotteryPool',
+  });
+
   // Fetch contract's token balance (tokens left in bonding curve)
   const { data: contractTokenBalanceData, refetch: refetchContractTokenBalance } = useReadContract({
     address: tokenAddress,
@@ -278,37 +294,44 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
   }, [calculatedReturnData, amount, tradeType, tokenDecimals]);
 
   // Calculate bonding curve progress
+  // useEffect(() => {
+  //   if (initialSupplyData && contractTokenBalanceData && tokenDecimals > 0) {
+  //     try {
+  //       // INITIAL_SUPPLY is already in wei (uint256 with 1e18 factor in contract)
+  //       // balanceOf also returns in wei
+  //       const initialSupplyBI = BigInt(initialSupplyData) * BigInt(8) / BigInt(10); // 80% of initial supply
+  //       const contractBalanceBI = contractTokenBalanceData; // Already BigInt
+  //       console.log("initialSupplyBI", initialSupplyBI);
+  //       console.log("contractBalanceBI", contractBalanceBI);
+
+  //       if (initialSupplyBI > 0n) {
+  //         // Calculate (contractBalanceBI / initialSupplyBI) * 100 with high precision
+  //         // We want to calculate P = 100 - ( (CB * 100) / IS )
+  //         // To maintain decimal places for (CB*100)/IS, we scale CB * 100 * 10^N before dividing by IS,
+  //         // then divide the JS number result by 10^N.
+  //         // Let's aim for 6 decimal places for the percentage part (CB*100)/IS.
+  //         const scaleFactor = 1000000n; // for 6 decimal places
+  //         const percentagePartScaled = (contractBalanceBI * 100n * scaleFactor) / (initialSupplyBI);
+  //         const percentageOfTotalLeftInCurve = Number(percentagePartScaled) / Number(scaleFactor);
+
+  //         console.log("percentageOfTotalLeftInCurve", percentageOfTotalLeftInCurve);
+
+  //         const progress = 100 - percentageOfTotalLeftInCurve;
+  //         setBondingCurveProgress(Math.max(0, Math.min(100, progress))); // Clamp
+  //       } else {
+  //         setBondingCurveProgress(0);
+  //       }
+  //     } catch (e) {
+  //       console.error("Error calculating bonding curve progress:", e);
+  //       setBondingCurveProgress(0); // Set to a default on error
+  //     }
+  //   }
+  // }, [initialSupplyData, contractTokenBalanceData, tokenDecimals]);
+
+  // Calculate bonding curve progress
   useEffect(() => {
-    if (initialSupplyData && contractTokenBalanceData && tokenDecimals > 0) {
-      try {
-        // INITIAL_SUPPLY is already in wei (uint256 with 1e18 factor in contract)
-        // balanceOf also returns in wei
-        const initialSupplyBI = BigInt(initialSupplyData) * BigInt(8) / BigInt(10); // 80% of initial supply
-        const contractBalanceBI = contractTokenBalanceData; // Already BigInt
-        console.log("initialSupplyBI", initialSupplyBI);
-        console.log("contractBalanceBI", contractBalanceBI);
-
-        if (initialSupplyBI > 0n) {
-          // Calculate (contractBalanceBI / initialSupplyBI) * 100 with high precision
-          // We want to calculate P = 100 - ( (CB * 100) / IS )
-          // To maintain decimal places for (CB*100)/IS, we scale CB * 100 * 10^N before dividing by IS,
-          // then divide the JS number result by 10^N.
-          // Let's aim for 6 decimal places for the percentage part (CB*100)/IS.
-          const scaleFactor = 1000000n; // for 6 decimal places
-          const percentagePartScaled = (contractBalanceBI * 100n * scaleFactor) / (initialSupplyBI);
-          const percentageOfTotalLeftInCurve = Number(percentagePartScaled) / Number(scaleFactor);
-
-          console.log("percentageOfTotalLeftInCurve", percentageOfTotalLeftInCurve);
-
-          const progress = 100 - percentageOfTotalLeftInCurve;
-          setBondingCurveProgress(Math.max(0, Math.min(100, progress))); // Clamp
-        } else {
-          setBondingCurveProgress(0);
-        }
-      } catch (e) {
-        console.error("Error calculating bonding curve progress:", e);
-        setBondingCurveProgress(0); // Set to a default on error
-      }
+    if (ethRaised) {
+      setBondingCurveProgress((Number(ethRaised) / Number(LotteryPool))*100);
     }
   }, [initialSupplyData, contractTokenBalanceData, tokenDecimals]);
 
@@ -532,7 +555,7 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
       </div>
       {tokenAddress && <div className="mb-3 text-xs text-gray-500 truncate" title={tokenAddress}>Pool: {tokenAddress}</div>}
       <div className="mb-1 text-xs text-green-400">
-        Bonding Curve Progress: {bondingCurveProgress.toFixed(6)}%
+        Bonding Curve Progress: {bondingCurveProgress.toFixed(2)}%
       </div>
       <div className="w-full bg-gray-700 rounded-full h-5 mb-6">
         <div 
