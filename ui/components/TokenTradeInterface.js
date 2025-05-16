@@ -163,6 +163,7 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
   const [currentTokenPrice, setCurrentTokenPrice] = useState("0");
   const [expectedReturn, setExpectedReturn] = useState("0"); // For buy/sell calculation
   const [tokenDecimals, setTokenDecimals] = useState(18); // Default to 18, fetch if different
+  const [bondingCurveProgress, setBondingCurveProgress] = useState(0); // Added for bonding curve progress
 
   const { address: accountAddress, isConnected, chain } = useAccount();
 
@@ -214,6 +215,24 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
     }
   }, [fetchedTokenDecimals]);
 
+  // Fetch INITIAL_SUPPLY
+  const { data: initialSupplyData } = useReadContract({
+    address: tokenAddress,
+    abi: BondingCurvePoolABI,
+    functionName: 'INITIAL_SUPPLY',
+    chainId: BASE_SEPOLIA_CHAIN_ID,
+    enabled: !!tokenAddress,
+  });
+
+  // Fetch contract's token balance (tokens left in bonding curve)
+  const { data: contractTokenBalanceData, refetch: refetchContractTokenBalance } = useReadContract({
+    address: tokenAddress,
+    abi: BondingCurvePoolABI,
+    functionName: 'balanceOf',
+    args: [tokenAddress], // Balance of the contract itself
+    chainId: BASE_SEPOLIA_CHAIN_ID,
+    enabled: !!tokenAddress,
+  });
 
   // Fetch current token price
   const { data: priceData, refetch: refetchPrice } = useReadContract({
@@ -258,6 +277,40 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
     }
   }, [calculatedReturnData, amount, tradeType, tokenDecimals]);
 
+  // Calculate bonding curve progress
+  useEffect(() => {
+    if (initialSupplyData && contractTokenBalanceData && tokenDecimals > 0) {
+      try {
+        // INITIAL_SUPPLY is already in wei (uint256 with 1e18 factor in contract)
+        // balanceOf also returns in wei
+        const initialSupplyBI = BigInt(initialSupplyData) * BigInt(8) / BigInt(10); // 80% of initial supply
+        const contractBalanceBI = contractTokenBalanceData; // Already BigInt
+        console.log("initialSupplyBI", initialSupplyBI);
+        console.log("contractBalanceBI", contractBalanceBI);
+
+        if (initialSupplyBI > 0n) {
+          // Calculate (contractBalanceBI / initialSupplyBI) * 100 with high precision
+          // We want to calculate P = 100 - ( (CB * 100) / IS )
+          // To maintain decimal places for (CB*100)/IS, we scale CB * 100 * 10^N before dividing by IS,
+          // then divide the JS number result by 10^N.
+          // Let's aim for 6 decimal places for the percentage part (CB*100)/IS.
+          const scaleFactor = 1000000n; // for 6 decimal places
+          const percentagePartScaled = (contractBalanceBI * 100n * scaleFactor) / (initialSupplyBI);
+          const percentageOfTotalLeftInCurve = Number(percentagePartScaled) / Number(scaleFactor);
+
+          console.log("percentageOfTotalLeftInCurve", percentageOfTotalLeftInCurve);
+
+          const progress = 100 - percentageOfTotalLeftInCurve;
+          setBondingCurveProgress(Math.max(0, Math.min(100, progress))); // Clamp
+        } else {
+          setBondingCurveProgress(0);
+        }
+      } catch (e) {
+        console.error("Error calculating bonding curve progress:", e);
+        setBondingCurveProgress(0); // Set to a default on error
+      }
+    }
+  }, [initialSupplyData, contractTokenBalanceData, tokenDecimals]);
 
   const handleAmountChange = (e) => {
     const val = e.target.value;
@@ -383,6 +436,7 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
       // refetchEthBalance(); // useBalance has `watch: true`
       refetchPrice();
       refetchCalculatedReturn(); // To reset expected return
+      refetchContractTokenBalance(); // Refetch contract balance for progress update
 
       // Log event details if available
       const contractInterface = new ethers.Interface(BondingCurvePoolABI);
@@ -415,7 +469,8 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
   }, [
     txHash, writeContractError, isWriteContractPending, 
     receipt, isReceiptSuccess, isReceiptLoading, waitForReceiptError,
-    refetchTokenBalance, refetchPrice, tokenDecimals, refetchCalculatedReturn
+    refetchTokenBalance, refetchPrice, tokenDecimals, refetchCalculatedReturn,
+    refetchContractTokenBalance // Added dependency
   ]);
 
 
@@ -473,9 +528,18 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
       </div>
 
       <div className="mb-1 text-xs text-gray-400">
-        Current Price: {parseFloat(currentTokenPrice).toFixed(6)} ETH/{tokenSymbol}
+        Current Price: {parseFloat(currentTokenPrice).toFixed(10)} ETH/{tokenSymbol}
       </div>
       {tokenAddress && <div className="mb-3 text-xs text-gray-500 truncate" title={tokenAddress}>Pool: {tokenAddress}</div>}
+      <div className="mb-1 text-xs text-green-400">
+        Bonding Curve Progress: {bondingCurveProgress.toFixed(6)}%
+      </div>
+      <div className="w-full bg-gray-700 rounded-full h-5 mb-6">
+        <div 
+          className="bg-green-500 h-5 rounded-full transition-all duration-500 ease-out"
+          style={{ width: `${bondingCurveProgress}%` }}
+        ></div>
+      </div>
 
 
       <div className="mb-3">
@@ -557,7 +621,7 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
 
       <button
         onClick={handleTrade}
-        disabled={isLoading || !tokenAddress || (parseFloat(amount) <= 0) || !isConnected}
+        disabled={isLoading || !tokenAddress || (parseFloat(amount) <= 0) || !isConnected || (tradeType === "sell" && userTokenBalance.toFixed(0) === "0")}
         className={`w-full py-2 rounded-lg font-bold text-base transition-all mt-auto ${
           tradeType === "buy"
             ? "bg-green-500 hover:bg-green-600 text-white"

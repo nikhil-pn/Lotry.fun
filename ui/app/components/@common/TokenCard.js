@@ -62,7 +62,7 @@ const TokenCard = ({ token }) => {
             {/* Ticket footer with lottery pool */}
             <div className="ticket-serial">
               <span className="serial-number">
-                Lottery Pool: {token.lotteryPool || "0"} ETH
+                Lottery Pool: {token.lotteryPool || "000000"} ETH
               </span>
             </div>
           </div>
