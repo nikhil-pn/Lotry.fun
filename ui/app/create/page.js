@@ -13,7 +13,7 @@ export default function CreateLotteryPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen text-white items-center justify-center p-4">
+    <div className="flex flex-col min-h-screen text-white items-center justify-center p-4 bg-[#15161B]">
       <Navbar /> {/* Use the Navbar component here */}
       {/* 
         You might want a consistent header here as well, 

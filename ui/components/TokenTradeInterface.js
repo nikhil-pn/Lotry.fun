@@ -443,17 +443,15 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
 
 
   return (
-    <div className="bg-green-800/30 rounded-xl border border-green-600 p-4 shadow-lg h-full flex flex-col">
+    <div className="0 rounded-xl border  p-4 shadow-lg h-full flex flex-col">
       <div className="flex justify-between items-center mb-3">
-        <h2 className="text-xl font-semibold text-green-300">
-          Trade {tokenName} ({tokenSymbol})
-        </h2>
+        <h2 className="text-md font-semibold text-green-100">Trade</h2>
         <div className="flex space-x-2">
           <button
             onClick={() => handleTradeTypeChange("buy")}
             className={`px-4 py-1 rounded-lg font-medium text-sm transition-all ${
               tradeType === "buy"
-                ? "bg-green-500 text-white"
+                ? "bg-green-300 text-white"
                 : "bg-gray-800 text-gray-400 hover:bg-gray-700"
             }`}
             disabled={isLoading}
