@@ -29,7 +29,18 @@ const TokenList = () => {
   }, []);
 
   if (loading) {
-    return <div className="text-center py-4">Loading tokens...</div>;
+    return (
+      <div className="flex flex-col items-center py-4">
+        <Image
+          src="/claw.png"
+          alt="Loading..."
+          width={64}
+          height={64}
+          className="animate-spin-slow mb-2"
+        />
+        <span className="text-gray-400">Loading tokens...</span>
+      </div>
+    );
   }
 
   if (error) {

@@ -40,13 +40,13 @@ export default function Home() {
       </main>
       {/* Trending Tokens Section */}
       <div className="w-full py-6">
-        <h2 className="text-sm font-medium  text-left pl-16 text-gray-400">
+        <h2 className="text-sm font-medium  text-left sm:pl-16 text-gray-400">
          Now trending
         </h2>
         <TrendingToken />
       </div>
       {/* Token List Section - now for all/recent tokens */}
-      <div className="w-full py-8">
+      <div className="w-full ">
         {/* Changed title for this section */}
         {/* <TokenList /> - We will ensure TokenList has its own title or adjust here */}
         <TokenList />

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { fetchTokens } from "../utils/firebaseHelpers"; // Assuming the same helper
 import TrendingTokenCard from "./@common/TrendingTokenCard"; // We'll create this next
+import Image from "next/image";
 
 const TrendingToken = () => {
   const [tokens, setTokens] = useState([]);
@@ -31,7 +32,18 @@ const TrendingToken = () => {
   }, []);
 
   if (loading) {
-    return <div className="text-center py-2">Loading trending...</div>;
+    return (
+      <div className="flex flex-col items-center py-2">
+        <Image
+          src="/claw.png"
+          alt="Loading..."
+          width={48}
+          height={48}
+          className="animate-spin-slow mb-2"
+        />
+        <span className="text-gray-400">Loading trending...</span>
+      </div>
+    );
   }
 
   if (error) {
