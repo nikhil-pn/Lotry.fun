@@ -12,11 +12,29 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="w-full h-[100px] flex justify-center sm:justify-between items-center top-0 z-50 bg-[#15161B]  mb-8">
-        <div className="p-10">
+      <header className="w-full h-[100px] flex flex-col sm:flex-row justify-center sm:justify-between items-center top-0 z-50 bg-[#15161B]  mb-8">
+        {/* Mobile: Logo left, WalletConnect right */}
+        <div className="flex w-full items-center justify-between sm:hidden px-6 h-full">
           <Link href="/" passHref legacyBehavior>
             <a className="flex items-center">
-              <img src="/lotryleaf.png" alt="LOTRY.FUN Logo" className="w-[160px] h-[160px]" />
+              <img
+                src="/lotryleaf.png"
+                alt="LOTRY.FUN Logo"
+                className="w-[80px] h-[80px]"
+              />
+            </a>
+          </Link>
+          <WalletConnect />
+        </div>
+        {/* Desktop: Logo left, actions right */}
+        <div className="p-10 hidden sm:block">
+          <Link href="/" passHref legacyBehavior>
+            <a className="flex items-center">
+              <img
+                src="/lotryleaf.png"
+                alt="LOTRY.FUN Logo"
+                className="w-[160px] h-[160px]"
+              />
             </a>
           </Link>
         </div>
