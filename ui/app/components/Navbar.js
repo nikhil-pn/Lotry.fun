@@ -13,7 +13,7 @@ export default function Navbar() {
   return (
     <>
       <header className="w-full h-[100px] flex flex-col sm:flex-row justify-center sm:justify-between items-center top-0 z-50 bg-[#15161B]  mb-8">
-        {/* Mobile: Logo left, WalletConnect right */}
+        {/* Mobile: Logo left, WalletConnect right here*/}
         <div className="flex w-full items-center justify-between sm:hidden px-6 h-full">
           <Link href="/" passHref legacyBehavior>
             <a className="flex items-center">
