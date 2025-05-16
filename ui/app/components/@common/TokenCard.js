@@ -9,8 +9,15 @@ const TokenCard = ({ token }) => {
           {/* Ticket header with decorative elements */}
           <div className="ticket-header">
             <div className="header-content">
-              <div className="lottery-badge">L</div>
-              <span className="lottery-text">LOTTERY TICKET</span>
+              <div className="lottery-badge">
+                <Image
+                  src="/claw.png"
+                  alt="Lottery badge"
+                  width={16}
+                  height={16}
+                />
+              </div>
+              <span className="lottery-text">{token.lotteryDate}</span>
             </div>
             <div className="ticker-symbol">{token.ticker || "---"}</div>
           </div>
@@ -114,7 +121,7 @@ const TokenCard = ({ token }) => {
           }
 
           .lottery-badge {
-            background: linear-gradient(135deg, #22c55e, #16a34a);
+            background: linear-gradient(#1C2530);
             width: 24px;
             height: 24px;
             display: flex;
@@ -124,6 +131,7 @@ const TokenCard = ({ token }) => {
             font-weight: bold;
             color: white;
             font-size: 14px;
+            overflow: hidden;
           }
 
           .lottery-text {
@@ -136,8 +144,8 @@ const TokenCard = ({ token }) => {
 
           .ticker-symbol {
             font-weight: bold;
-            font-size: 18px;
-            color: #22c55e;
+            font-size: 14px;
+            color: #f5f5f5;
             text-transform: uppercase;
           }
 
