@@ -10,7 +10,9 @@ import { getTokenData } from "../actions";
 import { notFound } from "next/navigation";
 
 export default async function TokenPage({ params }) {
-  const { id } = params; // Get the token ID from the route parameters
+  // Await params before destructuring
+  const resolvedParams = await params;
+  const { id } = resolvedParams;
 
   // Fetch token data from Firebase
   const token = await getTokenData(id);
