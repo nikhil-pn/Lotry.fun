@@ -5,10 +5,10 @@ import { db } from "../../lib/firebase";
 import { collection, addDoc } from "firebase/firestore";
 import DatePicker from "../common/DatePicker";
 import { ethers } from "ethers";
-import { 
-  useAccount, 
-  useWriteContract, 
-  useWaitForTransactionReceipt 
+import {
+  useAccount,
+  useWriteContract,
+  useWaitForTransactionReceipt
 } from "wagmi";
 import { config as wagmiConfig } from "../utils/wagmi";
 import { updateTokenOnLaunch } from "../utils/firebaseHelpers";
@@ -87,7 +87,8 @@ const tokenLaunchpadABI = [
 ];
 
 // Contract Address deployed on Base Sepolia with wallet 0xC43389A2B7eB3e5540FDC734dA7205A215551d01
-const contractAddress = "0x309dC64c713c1E690a1BBf426A1c5732873b94b7";
+//const contractAddress = "0x309dC64c713c1E690a1BBf426A1c5732873b94b7";
+const contractAddress = "0x4aefdb502562a55aae91dfdaf5a11f1724d945d1";
 
 export default function CreateLottery({ onGoBack }) {
   const [tokenName, setTokenName] = useState("");
@@ -113,9 +114,9 @@ export default function CreateLottery({ onGoBack }) {
   const [firebaseDocId, setFirebaseDocId] = useState(null); // Store Firebase Doc ID
 
   // Wagmi's write contract hook
-  const { 
+  const {
     data: txHash, // Renamed from `hash` for clarity
-    error: writeContractError, 
+    error: writeContractError,
     isPending: isWriteContractPending,
     writeContractAsync // We'll call this function
   } = useWriteContract();
@@ -231,11 +232,11 @@ export default function CreateLottery({ onGoBack }) {
       setIsSubmitting(false); // Stops after Firebase save if wallet not connected
       return;
     }
-    if (chain && chain.id !== 84532) { // Base Sepolia Chain ID
-      setError(`Please switch your wallet to Base Sepolia. You are on chain ID ${chain.id}.`);
-      setIsSubmitting(false);
-      return;
-    }
+    //if (chain && chain.id !== 84532) { // Base Sepolia Chain ID
+    //  setError(`Please switch your wallet to Base Sepolia. You are on chain ID ${chain.id}.`);
+    //  setIsSubmitting(false);
+    //  return;
+    //}
 
     try {
       const parsedTokenPrice = ethers.parseEther("0.0001");
@@ -262,8 +263,8 @@ export default function CreateLottery({ onGoBack }) {
       console.error("Smart contract call error (writeContractAsync): ", contractCallError);
       setError(`Blockchain transaction failed: ${contractCallError.shortMessage || contractCallError.message}`);
       // Optionally update Firebase status to "failed"
-      if (currentFirebaseDocId) { 
-        updateTokenOnLaunch(currentFirebaseDocId, { status: "blockchain_failed", error: contractCallError.message }); 
+      if (currentFirebaseDocId) {
+        updateTokenOnLaunch(currentFirebaseDocId, { status: "blockchain_failed", error: contractCallError.message });
       }
       setIsSubmitting(false); // Overall submission stops if contract call fails to initiate
     }
@@ -273,32 +274,32 @@ export default function CreateLottery({ onGoBack }) {
   };
 
   // Hook to wait for the transaction receipt
-  const { 
-    data: receipt, 
-    error: waitForReceiptError, 
-    isLoading: isReceiptLoading, 
-    isSuccess: isReceiptSuccess 
+  const {
+    data: receipt,
+    error: waitForReceiptError,
+    isLoading: isReceiptLoading,
+    isSuccess: isReceiptSuccess
   } = useWaitForTransactionReceipt({ hash: txHash });
 
   useEffect(() => {
     // This effect runs when `txHash` from `useWriteContract` is set,
     // or when receipt status changes.
     if (isWriteContractPending) {
-        setSuccessMessage("Please confirm the transaction in your wallet...");
-        setError(""); // Clear previous errors
-        return; // Don't proceed further if still pending wallet confirmation
+      setSuccessMessage("Please confirm the transaction in your wallet...");
+      setError(""); // Clear previous errors
+      return; // Don't proceed further if still pending wallet confirmation
     }
     if (writeContractError) {
-        setError(`Transaction submission failed: ${writeContractError.shortMessage || writeContractError.message}`);
-        setSuccessMessage("");
-        setIsSubmitting(false);
-        return;
+      setError(`Transaction submission failed: ${writeContractError.shortMessage || writeContractError.message}`);
+      setSuccessMessage("");
+      setIsSubmitting(false);
+      return;
     }
 
     if (txHash && !isReceiptLoading && !isReceiptSuccess && !waitForReceiptError) {
-        setSuccessMessage(`Transaction ${txHash} sent. Waiting for blockchain confirmation...`);
+      setSuccessMessage(`Transaction ${txHash} sent. Waiting for blockchain confirmation...`);
     }
-    
+
     if (isReceiptSuccess && receipt) {
       console.log("Transaction confirmed:", receipt);
       const contractInterface = new ethers.Interface(tokenLaunchpadABI);
@@ -308,8 +309,8 @@ export default function CreateLottery({ onGoBack }) {
 
       if (receipt.logs) {
         const eventTopic = ethers.id("TokenCreated(address,string,string)");
-        const tokenCreatedLog = receipt.logs.find(log => 
-          log.topics[0] === eventTopic && 
+        const tokenCreatedLog = receipt.logs.find(log =>
+          log.topics[0] === eventTopic &&
           log.address.toLowerCase() === contractAddress.toLowerCase()
         );
 
@@ -320,9 +321,9 @@ export default function CreateLottery({ onGoBack }) {
               const newTokenAddress = decodedEvent.args.tokenAddress;
               const poolName = decodedEvent.args.name;
               const poolSymbol = decodedEvent.args.symbol;
-              
+
               setSuccessMessage(`Lottery "${newLotteryName}" launched! Token Address: ${newTokenAddress}. Tx: ${txHash}`);
-              
+
               // Update Firebase with the new tokenAddress and status
               if (firebaseDocId) {
                 updateTokenOnLaunch(firebaseDocId, {
@@ -362,13 +363,13 @@ export default function CreateLottery({ onGoBack }) {
       console.error("Error waiting for transaction receipt:", waitForReceiptError);
       setError(`Transaction confirmation failed: ${waitForReceiptError.shortMessage || waitForReceiptError.message}`);
       if (firebaseDocId) {
-         updateTokenOnLaunch(firebaseDocId, { status: "blockchain_receipt_failed", error: waitForReceiptError.message });
+        updateTokenOnLaunch(firebaseDocId, { status: "blockchain_receipt_failed", error: waitForReceiptError.message });
       }
       setSuccessMessage("");
       setIsSubmitting(false);
     }
   }, [
-    txHash, writeContractError, isWriteContractPending, 
+    txHash, writeContractError, isWriteContractPending,
     receipt, isReceiptSuccess, isReceiptLoading, waitForReceiptError,
     tokenName, firebaseDocId // Keep tokenName & firebaseDocId for messages/updates if form is reset early
   ]);

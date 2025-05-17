@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { ethers } from "ethers";
-import { 
-  useAccount, 
-  useWriteContract, 
+import {
+  useAccount,
+  useWriteContract,
   useWaitForTransactionReceipt,
   useReadContract,
   useBalance
@@ -169,18 +169,18 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
   const { address: accountAddress, isConnected, chain } = useAccount();
 
   // Wagmi hooks for contract interaction
-  const { 
-    data: txHash, 
-    error: writeContractError, 
+  const {
+    data: txHash,
+    error: writeContractError,
     isPending: isWriteContractPending,
-    writeContractAsync 
+    writeContractAsync
   } = useWriteContract();
 
-  const { 
-    data: receipt, 
-    error: waitForReceiptError, 
-    isLoading: isReceiptLoading, 
-    isSuccess: isReceiptSuccess 
+  const {
+    data: receipt,
+    error: waitForReceiptError,
+    isLoading: isReceiptLoading,
+    isSuccess: isReceiptSuccess
   } = useWaitForTransactionReceipt({ hash: txHash });
 
   // Fetch user's ETH balance
@@ -200,7 +200,7 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
     enabled: !!accountAddress && !!tokenAddress, // Only run if prerequisites are met
   });
   const userTokenBalance = tokenBalanceData ? parseFloat(ethers.formatUnits(tokenBalanceData, tokenDecimals)) : 0;
-  
+
   // Fetch token decimals
   const { data: fetchedTokenDecimals } = useReadContract({
     address: tokenAddress,
@@ -292,8 +292,8 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
   useEffect(() => {
     if (calculatedReturnData) {
       setExpectedReturn(
-        tradeType === 'buy' 
-          ? ethers.formatUnits(calculatedReturnData, tokenDecimals) 
+        tradeType === 'buy'
+          ? ethers.formatUnits(calculatedReturnData, tokenDecimals)
           : ethers.formatEther(calculatedReturnData)
       );
     } else if (amount && parseFloat(amount) > 0) {
@@ -341,7 +341,7 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
   // Calculate bonding curve progress
   useEffect(() => {
     if (ethRaised) {
-      setBondingCurveProgress((Number(ethRaised) / Number(LotteryPool))*100);
+      setBondingCurveProgress((Number(ethRaised) / Number(LotteryPool)) * 100);
     }
   }, [initialSupplyData, contractTokenBalanceData, tokenDecimals]);
 
@@ -362,7 +362,7 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
 
   const handleAmountChange = (e) => {
     const val = e.target.value;
-     // Allow only numbers and a single decimal point
+    // Allow only numbers and a single decimal point
     if (val === "" || /^\d*\.?\d*$/.test(val)) {
       setAmount(val);
     }
@@ -384,10 +384,10 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
       setError("Please connect your wallet.");
       return;
     }
-    if (chain && chain.id !== BASE_SEPOLIA_CHAIN_ID) {
-      setError(`Please switch to Base Sepolia network. You are on chain ID ${chain.id}.`);
-      return;
-    }
+    //if (chain && chain.id !== BASE_SEPOLIA_CHAIN_ID) {
+    //  setError(`Please switch to Base Sepolia network. You are on chain ID ${chain.id}.`);
+    //  return;
+    //}
     if (!tokenAddress) {
       setError("Token address not provided. Cannot perform trade.");
       return;
@@ -405,13 +405,13 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
       if (tradeType === "buy") {
         const ethValue = ethers.parseEther(amount);
         console.log(`Calling 'buy' function with ETH value: ${ethers.formatEther(ethValue)}`);
-        
+
         // Pre-flight check for buy return
         const tokensToReceive = await refetchCalculatedReturn();
         if (!tokensToReceive.data || ethers.toBigInt(tokensToReceive.data) === 0n) {
-            setError("Calculated tokens to receive is zero. Transaction not sent.");
-            setIsSubmitting(false);
-            return;
+          setError("Calculated tokens to receive is zero. Transaction not sent.");
+          setIsSubmitting(false);
+          return;
         }
         console.log(`Expected tokens to receive from calculateBuyReturn: ${ethers.formatUnits(tokensToReceive.data, tokenDecimals)}`);
 
@@ -428,10 +428,10 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
 
         // Pre-flight check for sell return
         const ethToReceive = await refetchCalculatedReturn();
-         if (!ethToReceive.data || ethers.toBigInt(ethToReceive.data) === 0n) {
-            setError("Calculated ETH to receive is zero. Transaction not sent.");
-            setIsSubmitting(false);
-            return;
+        if (!ethToReceive.data || ethers.toBigInt(ethToReceive.data) === 0n) {
+          setError("Calculated ETH to receive is zero. Transaction not sent.");
+          setIsSubmitting(false);
+          return;
         }
         console.log(`Expected ETH to receive from calculateSellReturn: ${ethers.formatEther(ethToReceive.data)}`);
 
@@ -444,8 +444,8 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
         });
       }
       console.log("Transaction submitted. Hash:", txHash); // txHash is updated by useWriteContract
-                                                       // but txResponse from await has it immediately.
-                                                       // Using txHash from the hook is generally safer for subsequent steps.
+      // but txResponse from await has it immediately.
+      // Using txHash from the hook is generally safer for subsequent steps.
 
     } catch (err) {
       console.error("Error submitting transaction:", err);
@@ -453,7 +453,7 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
       setIsSubmitting(false);
     }
   };
-  
+
   // Effect to handle transaction lifecycle (pending, success, error)
   useEffect(() => {
     if (isWriteContractPending) {
@@ -471,7 +471,7 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
     if (txHash && !isReceiptLoading && !isReceiptSuccess && !waitForReceiptError) {
       setSuccessMessage(`Transaction ${txHash} sent. Waiting for confirmation...`);
     }
-    
+
     if (isReceiptSuccess && receipt) {
       console.log("Transaction Confirmed! Receipt:", receipt);
       setSuccessMessage(`Trade successful! Tx: ${receipt.transactionHash}`);
@@ -515,7 +515,7 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
       setIsSubmitting(false); // Re-enable button
     }
   }, [
-    txHash, writeContractError, isWriteContractPending, 
+    txHash, writeContractError, isWriteContractPending,
     receipt, isReceiptSuccess, isReceiptLoading, waitForReceiptError,
     refetchTokenBalance, refetchPrice, tokenDecimals, refetchCalculatedReturn,
     refetchContractTokenBalance // Added dependency
@@ -552,22 +552,20 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
         <div className="flex space-x-2">
           <button
             onClick={() => handleTradeTypeChange("buy")}
-            className={`px-4 py-1 rounded-lg font-medium text-sm transition-all ${
-              tradeType === "buy"
-                ? "bg-green-300 text-white"
-                : "bg-gray-800 text-gray-400 hover:bg-gray-700"
-            }`}
+            className={`px-4 py-1 rounded-lg font-medium text-sm transition-all ${tradeType === "buy"
+              ? "bg-green-300 text-white"
+              : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+              }`}
             disabled={isLoading}
           >
             Buy
           </button>
           <button
             onClick={() => handleTradeTypeChange("sell")}
-            className={`px-4 py-1 rounded-lg font-medium text-sm transition-all ${
-              tradeType === "sell"
-                ? "bg-red-500 text-white"
-                : "bg-gray-800 text-gray-400 hover:bg-gray-700"
-            }`}
+            className={`px-4 py-1 rounded-lg font-medium text-sm transition-all ${tradeType === "sell"
+              ? "bg-red-500 text-white"
+              : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+              }`}
             disabled={isLoading}
           >
             Sell
@@ -586,7 +584,7 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
         Bonding Curve Progress: {bondingCurveProgress.toFixed(2)}%
       </div>
       <div className="w-full bg-gray-700 rounded-full h-5 mb-6">
-        <div 
+        <div
           className="bg-green-500 h-5 rounded-full transition-all duration-500 ease-out"
           style={{ width: `${bondingCurveProgress}%` }}
         ></div>
@@ -618,9 +616,9 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
           </div>
         </div>
       </div>
-       <div className="text-xs text-gray-400 mb-3 h-4"> {/* Min height to prevent layout shift */}
+      <div className="text-xs text-gray-400 mb-3 h-4"> {/* Min height to prevent layout shift */}
         {parseFloat(amount) > 0 && expectedReturn !== "0" && (
-          tradeType === 'buy' 
+          tradeType === 'buy'
             ? `You will receive approx: ${parseFloat(expectedReturn).toFixed(4)} ${tokenSymbol}`
             : `You will receive approx: ${parseFloat(expectedReturn).toFixed(4)} ETH`
         )}
@@ -673,11 +671,10 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
       <button
         onClick={handleTrade}
         disabled={isLoading || !tokenAddress || (parseFloat(amount) <= 0) || !isConnected || (tradeType === "sell" && userTokenBalance.toFixed(0) === "0")}
-        className={`w-full py-2 rounded-lg font-bold text-base transition-all mt-auto ${
-          tradeType === "buy"
-            ? "bg-green-500 hover:bg-green-600 text-white"
-            : "bg-red-500 hover:bg-red-600 text-white"
-        } disabled:opacity-50 disabled:cursor-not-allowed`}
+        className={`w-full py-2 rounded-lg font-bold text-base transition-all mt-auto ${tradeType === "buy"
+          ? "bg-green-500 hover:bg-green-600 text-white"
+          : "bg-red-500 hover:bg-red-600 text-white"
+          } disabled:opacity-50 disabled:cursor-not-allowed`}
       >
         {buttonText()}
       </button>
