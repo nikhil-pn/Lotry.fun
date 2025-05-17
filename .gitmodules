@@ -1,3 +1,9 @@
 [submodule "tokenlaunchpad"]
 	path = tokenlaunchpad
 	url = https://github.com/4rjunc/solidity-amm
+[submodule "contracts/launchpad"]
+	path = contracts/launchpad
+	url = https://github.com/4rjunc/solidity-amm
+[submodule "contracts/uniswap-contracts"]
+	path = contracts/uniswap-contracts
+	url = https://github.com/4rjunc/uniswap-contracts
