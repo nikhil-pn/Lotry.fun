@@ -152,6 +152,7 @@ const BondingCurvePoolABI = [
 ];
 
 const BASE_SEPOLIA_CHAIN_ID = 84532; // Base Sepolia Chain ID
+const BASE_MAINNET_CHAIN_ID = 8453; // Base Mainnet Chain ID
 
 // Component receives tokenAddress for the specific BondingCurvePool
 const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
@@ -196,7 +197,7 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
     abi: BondingCurvePoolABI,
     functionName: 'balanceOf',
     args: [accountAddress],
-    chainId: BASE_SEPOLIA_CHAIN_ID,
+    chainId: BASE_MAINNET_CHAIN_ID,
     enabled: !!accountAddress && !!tokenAddress, // Only run if prerequisites are met
   });
   const userTokenBalance = tokenBalanceData ? parseFloat(ethers.formatUnits(tokenBalanceData, tokenDecimals)) : 0;
@@ -206,7 +207,7 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
     address: tokenAddress,
     abi: BondingCurvePoolABI,
     functionName: 'decimals',
-    chainId: BASE_SEPOLIA_CHAIN_ID,
+    chainId: BASE_MAINNET_CHAIN_ID,
     enabled: !!tokenAddress,
   });
 
@@ -221,7 +222,7 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
     address: tokenAddress,
     abi: BondingCurvePoolABI,
     functionName: 'INITIAL_SUPPLY',
-    chainId: BASE_SEPOLIA_CHAIN_ID,
+    chainId: BASE_MAINNET_CHAIN_ID,
     enabled: !!tokenAddress,
   });
 
@@ -230,7 +231,7 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
     address: tokenAddress,
     abi: BondingCurvePoolABI,
     functionName: 'ethRaised',
-    chainId: BASE_SEPOLIA_CHAIN_ID,
+    chainId: BASE_MAINNET_CHAIN_ID,
     enabled: !!tokenAddress,
   });
 
@@ -246,7 +247,7 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
     address: tokenAddress,
     abi: BondingCurvePoolABI,
     functionName: 'virtualTokenReserve',
-    chainId: BASE_SEPOLIA_CHAIN_ID,
+    chainId: BASE_MAINNET_CHAIN_ID,
     enabled: !!tokenAddress,
   });
 
@@ -256,7 +257,7 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
     abi: BondingCurvePoolABI,
     functionName: 'balanceOf',
     args: [tokenAddress], // Balance of the contract itself
-    chainId: BASE_SEPOLIA_CHAIN_ID,
+    chainId: BASE_MAINNET_CHAIN_ID,
     enabled: !!tokenAddress,
   });
 
@@ -265,7 +266,7 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
     address: tokenAddress,
     abi: BondingCurvePoolABI,
     functionName: 'calculateCurrentPrice',
-    chainId: BASE_SEPOLIA_CHAIN_ID,
+    chainId: BASE_MAINNET_CHAIN_ID,
     enabled: !!tokenAddress,
   });
 
@@ -285,7 +286,7 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
         (tradeType === 'buy' ? ethers.parseEther(amount) : ethers.parseUnits(amount, tokenDecimals))
         : ethers.parseEther("0") // Default to 0 if amount is invalid
     ],
-    chainId: BASE_SEPOLIA_CHAIN_ID,
+    chainId: BASE_MAINNET_CHAIN_ID,
     enabled: !!tokenAddress && !!amount && !isNaN(parseFloat(amount)) && parseFloat(amount) > 0,
   });
 
@@ -384,10 +385,10 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
       setError("Please connect your wallet.");
       return;
     }
-    //if (chain && chain.id !== BASE_SEPOLIA_CHAIN_ID) {
-    //  setError(`Please switch to Base Sepolia network. You are on chain ID ${chain.id}.`);
-    //  return;
-    //}
+    if (chain && chain.id !== BASE_MAINNET_CHAIN_ID) {
+     setError(`Please switch to Base Sepolia network. You are on chain ID ${chain.id}.`);
+     return;
+    }
     if (!tokenAddress) {
       setError("Token address not provided. Cannot perform trade.");
       return;
@@ -420,7 +421,7 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
           abi: BondingCurvePoolABI,
           functionName: 'buy',
           value: ethValue, // Send ETH with the transaction for buying
-          // chainId: BASE_SEPOLIA_CHAIN_ID // Not needed if wallet is on correct chain
+          chainId: BASE_MAINNET_CHAIN_ID // Not needed if wallet is on correct chain
         });
       } else { // Sell
         const tokenAmountParsed = ethers.parseUnits(amount, tokenDecimals);
@@ -440,7 +441,7 @@ const TokenTradeInterface = ({ tokenSymbol, tokenName, tokenAddress }) => {
           abi: BondingCurvePoolABI,
           functionName: 'sell',
           args: [tokenAmountParsed],
-          // chainId: BASE_SEPOLIA_CHAIN_ID
+          chainId: BASE_MAINNET_CHAIN_ID
         });
       }
       console.log("Transaction submitted. Hash:", txHash); // txHash is updated by useWriteContract
